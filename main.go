@@ -5,19 +5,10 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"tempserver/structs"
 
 	"rsc.io/letsencrypt"
 )
-
-type Token struct {
-	Token string `json:"token"`
-}
-
-type Reading struct {
-	Reading string `json:"reading"`
-	Time    string `json:"time"`
-	Topic   string `json:"topic"`
-}
 
 func main() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
@@ -25,17 +16,24 @@ func main() {
 	})
 	http.HandleFunc("/register", func(w http.ResponseWriter, r *http.Request) {
 		decoder := json.NewDecoder(r.Body)
-		var token Token
+		var token structs.Token
 		err := decoder.Decode(&token)
 		if err != nil {
-			panic(err)
+			w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+			w.WriteHeader(http.StatusBadRequest)
+			return
 		}
 		go handleRegistration(token)
+		w.WriteHeader(http.StatusOK)
 	})
 
 	http.HandleFunc("/reading", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != "POST" {
+			w.WriteHeader(http.StatusMethodNotAllowed)
+			return
+		}
 		decoder := json.NewDecoder(r.Body)
-		var reading Reading
+		var reading structs.Reading
 		err := decoder.Decode(&reading)
 		if err != nil {
 			panic(err)
@@ -50,10 +48,10 @@ func main() {
 	log.Fatal(m.Serve())
 }
 
-func handleRegistration(token Token) {
+func handleRegistration(token structs.Token) {
 	log.Println(token.Token)
 }
 
-func handleReading(reading Reading) {
+func handleReading(reading structs.Reading) {
 	log.Println(reading.Reading)
 }
