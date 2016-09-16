@@ -3,15 +3,26 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io"
 	"log"
 	"net/http"
+	"runtime"
+	"strconv"
 	"tempserver/structs"
+	"tempserver/workers"
 
 	"rsc.io/letsencrypt"
 )
 
+var nWorkers = 4
+
 func main() {
+	runtime.GOMAXPROCS(runtime.NumCPU())
+	//Start the work dispatcher
+	workers.StartDispatcher(nWorkers)
+	for i := 0; i < 1000000; i++ {
+		work := workers.WorkRequest{strconv.Itoa(i), "Message"}
+		workers.AddJob(work)
+	}
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "Hello, TLS!\n")
 	})
@@ -65,8 +76,8 @@ func payloadHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Read the body into a string for json decoding
-	var content = &PayloadCollection{}
-	err := json.NewDecoder(io.LimitReader(r.Body, MaxLength)).Decode(&content)
+	/*var content = &PayloadCollection{}
+	#err := json.NewDecoder(io.LimitReader(r.Body, MaxLength)).Decode(&content)
 	if err != nil {
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		w.WriteHeader(http.StatusBadRequest)
@@ -81,7 +92,7 @@ func payloadHandler(w http.ResponseWriter, r *http.Request) {
 
 		// Push the work onto the queue.
 		JobQueue <- work
-	}
+	}*/
 
 	w.WriteHeader(http.StatusOK)
 }

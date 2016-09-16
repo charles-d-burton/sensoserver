@@ -1,6 +1,7 @@
 package structs
 
 type Payload struct {
+	Reading Reading
 }
 
 type Token struct {
