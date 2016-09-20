@@ -33,10 +33,10 @@ func (w *Worker) Start() {
 
 			select {
 			case work := <-w.Work:
-				var n int
+				var n float64
 				arr := []byte(work.Message)
 				for i := range arr {
-					n = i + n
+					n = float64(i) + n
 				}
 
 				// Receive a work request.

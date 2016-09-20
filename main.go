@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"runtime"
 	"strconv"
 	"tempserver/structs"
 	"tempserver/workers"
@@ -16,10 +15,10 @@ import (
 var nWorkers = 4
 
 func main() {
-	runtime.GOMAXPROCS(runtime.NumCPU())
+	//runtime.GOMAXPROCS(runtime.NumCPU())
 	//Start the work dispatcher
 	workers.StartDispatcher(nWorkers)
-	for i := 0; i < 1000000; i++ {
+	for i := 0; i < 10000000000; i++ {
 		work := workers.WorkRequest{strconv.Itoa(i), "Message"}
 		workers.AddJob(work)
 	}
