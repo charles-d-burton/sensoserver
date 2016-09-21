@@ -1,6 +1,11 @@
 package workers
 
-import "fmt"
+import (
+	"fmt"
+	"log"
+
+	fcm "github.com/NaySoftware/go-fcm"
+)
 
 // NewWorker creates, and returns a new Worker object. Its only argument
 // is a channel that the worker can add itself to whenever it is done its
@@ -25,7 +30,8 @@ type Worker struct {
 
 // This function "starts" the worker by starting a goroutine, that is
 // an infinite "for-select" loop.
-func (w *Worker) Start() {
+func (w *Worker) Start(ApiKey string) {
+	fcmClient := fcm.NewFcmClient(ApiKey)
 	go func() {
 		for {
 			// Add ourselves into the worker queue.
@@ -33,12 +39,22 @@ func (w *Worker) Start() {
 
 			select {
 			case work := <-w.Work:
-				var n float64
-				arr := []byte(work.Message)
-				for i := range arr {
-					n = float64(i) + n
-				}
+				//arr := []byte(work.Message)
 
+				log.Println(work.Message)
+				data := map[string]string{
+					"msg": work.Message,
+				}
+				topic := "/topics/" + work.Topic
+				log.Println("Topic:", topic)
+				fcmClient.NewFcmMsgTo(topic, data)
+				status, err := fcmClient.Send()
+				if err == nil {
+					status.PrintResults()
+				} else {
+					status.PrintResults()
+					log.Println(err)
+				}
 				// Receive a work request.
 				//log.Println("Job Received")
 				//fmt.Printf("worker%d: Hello, %s!\n", w.ID, work.Name)

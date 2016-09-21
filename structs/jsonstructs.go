@@ -18,3 +18,8 @@ type Reading struct {
 	Time    string `json:"time"`
 	Topic   string `json:"topic"`
 }
+type Message struct {
+	Token   string `json:"token"`
+	Topic   string `json:"topic"`
+	Message string `json:"message"`
+}
