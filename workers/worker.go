@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	fcm "github.com/NaySoftware/go-fcm"
+	"github.com/NaySoftware/go-fcm"
 )
 
 // NewWorker creates, and returns a new Worker object. Its only argument
@@ -39,7 +39,6 @@ func (w *Worker) Start(ApiKey string) {
 
 			select {
 			case work := <-w.Work:
-				//arr := []byte(work.Message)
 
 				log.Println(work.Message)
 				data := map[string]string{
@@ -55,9 +54,6 @@ func (w *Worker) Start(ApiKey string) {
 					status.PrintResults()
 					log.Println(err)
 				}
-				// Receive a work request.
-				//log.Println("Job Received")
-				//fmt.Printf("worker%d: Hello, %s!\n", w.ID, work.Name)
 
 			case <-w.QuitChan:
 				// We have been asked to stop.

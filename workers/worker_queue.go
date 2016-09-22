@@ -6,13 +6,6 @@ import (
 	"net/http"
 )
 
-var (
-	MaxWorker = 4
-	MaxQueue  = 100
-	//MaxWorker = os.Getenv("MAX_WORKERS")
-	//MaxQueue  = os.Getenv("MAX_QUEUE")
-)
-
 // A buffered channel that we can send work requests on.
 var WorkQueue = make(chan WorkRequest, 100)
 
@@ -29,9 +22,9 @@ func AddJob(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
-	decoder := json.NewDecoder(r.Body)
+	defer r.Body.Close()
 	var message WorkRequest
-	err := decoder.Decode(&message)
+	err := json.NewDecoder(r.Body).Decode(&message)
 	if err != nil {
 		log.Println(err)
 	} else {
