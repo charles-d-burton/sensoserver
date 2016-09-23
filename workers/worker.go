@@ -1,11 +1,8 @@
 package workers
 
 import (
-	"bytes"
 	"fmt"
 	"log"
-
-	fcm "github.com/NaySoftware/go-fcm"
 )
 
 // NewWorker creates, and returns a new Worker object. Its only argument
@@ -65,36 +62,10 @@ func handleWork(work *WorkRequest) {
 	log.Println(work.MessageType)
 	switch work.MessageType {
 	case "register":
-		registerClient(work)
+		err := work.RegisterClient()
 	case "reading":
-		publishToFirebase(work)
+		err := work.PublishToFirebase()
 	}
-
-}
-
-//Send the reading data to Firebase Cloud Messaging
-func publishToFirebase(work *WorkRequest) {
-	fcmClient := fcm.NewFcmClient(key)
-
-	//Use a buffer to concat strings, it's much faster
-	buffer := bytes.NewBuffer(make([]byte, 0, 32))
-	buffer.WriteString("/topics/")
-	buffer.WriteString(work.Topic)
-	topic := buffer.String()
-
-	log.Println("Topic:", topic)
-	fcmClient.NewFcmMsgTo(topic, work.Data)
-	status, err := fcmClient.Send()
-	if err == nil {
-		status.PrintResults()
-	} else {
-		status.PrintResults()
-		log.Println(err)
-	}
-}
-
-//Register a new client and topic
-func registerClient(work *WorkRequest) {
 
 }
 
