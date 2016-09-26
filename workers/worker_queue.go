@@ -3,9 +3,11 @@ package workers
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"log"
+	"tempserver/helpers"
 
-	fcm "github.com/NaySoftware/go-fcm"
+	"github.com/NaySoftware/go-fcm"
 	"github.com/boltdb/bolt"
 )
 
@@ -14,6 +16,8 @@ var (
 	boltDir = "./senso.db"
 )
 
+const bucketTopics = "topics"
+
 func init() {
 	db, err := bolt.Open(boltDir, 0600, nil)
 	if err != nil {
@@ -21,7 +25,7 @@ func init() {
 	}
 	boltDB = db
 	boltDB.Update(func(tx *bolt.Tx) error {
-		b, err := tx.CreateBucketIfNotExists([]byte("topics"))
+		_, err := tx.CreateBucketIfNotExists([]byte(bucketTopics))
 		if err != nil {
 			log.Println(err)
 		}
@@ -66,35 +70,80 @@ func (work WorkRequest) PublishToFirebase() error {
 	return err
 }
 
-func (work WorkRequest) RegisterClient() error {
-	boltDB.Update(func(tx *bolt.Tx) error {
-		b := tx.Bucket([]byte("topics"))
-		return nil
-	})
-	return nil
-}
-
-func (work WorkRequest) RefreshToken() error {
-	return nil
-}
-
-func (work WorkRequest) JoinTopic() error {
-	return nil
-}
-
-func (work WorkRequest) LeaveTopic() error {
-	return nil
-}
-
-type Register struct {
+type Registration struct {
 	Token string `json:"token"`
 	Topic string `json:"topic"`
+}
+
+func (register Registration) Register() error {
+	token := make([]string, 0)
+	token = append(token, register.Token)
+	tokens := Tokens{
+		Tokens: token,
+	}
+	data, err := json.Marshal(tokens)
+	err = boltDB.Update(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte(bucketTopics))
+		err := b.Put([]byte(register.Topic), data)
+		return err
+	})
+	return err
+}
+
+func (register Registration) JoinTopic() error {
+	err := boltDB.Update(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte(bucketTopics))
+		data := b.Get([]byte(register.Topic))
+		if data != nil {
+			var tokens Tokens
+			err := json.Unmarshal(data, &tokens)
+			if err == nil {
+				tokens.Tokens = helpers.AppendIfMissing(tokens.Tokens, register.Token)
+				data, err := json.Marshal(tokens)
+				log.Println("Tokens joined!", string(data))
+				err = b.Put([]byte(register.Topic), data)
+				return err
+			}
+		} else {
+			return errors.New("Topic Not Found")
+		}
+		return nil
+	})
+	return err
+}
+
+func (register Registration) LeaveTopic() error {
+	return nil
 }
 
 type RefreshToken struct {
 	NewToken string `json:"newtoken"`
 }
 
-func findKey(token string) (bool, error) {
-	return false, nil
+type Tokens struct {
+	Tokens []string `json:"tokens"`
+}
+
+//Discover if the token is already in a topic
+func findToken(token string) (bool, string) {
+	found := false
+	topic := ""
+	boltDB.View(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte(bucketTopics))
+		c := b.Cursor()
+		for key, value := c.First(); key != nil; key, value = c.Next() {
+			var tokenStruct Tokens
+			err := json.Unmarshal(value, &tokenStruct)
+			if err != nil {
+				for _, tVal := range tokenStruct.Tokens {
+					if tVal == token {
+						found = true
+						topic = string(key)
+					}
+				}
+			}
+		}
+		return nil
+	})
+	return found, topic
 }

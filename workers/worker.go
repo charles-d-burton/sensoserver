@@ -61,10 +61,11 @@ func (w *Worker) Stop() {
 func handleWork(work *WorkRequest) {
 	log.Println(work.MessageType)
 	switch work.MessageType {
-	case "register":
-		err := work.RegisterClient()
 	case "reading":
 		err := work.PublishToFirebase()
+		if err != nil {
+			log.Println(err)
+		}
 	}
 
 }

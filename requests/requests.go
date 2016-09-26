@@ -19,28 +19,42 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
-	message, err := decoder(r)
-	if err != nil {
-		log.Println(err)
-		return
+	defer r.Body.Close()
+	var registration workers.Registration
+	err := json.NewDecoder(r.Body).Decode(&registration)
+	if err == nil {
+		registration.Topic = uniuri.New()
+		registration.Register()
+		data, err := json.Marshal(&registration)
+		if err == nil {
+			log.Println("Registration Fulfilled")
+			log.Println(string(data))
+			io.WriteString(w, string(data))
+		} else {
+			log.Println(err)
+		}
 	}
-
-	registration := new(workers.Register)
-	registration.Token = message.Token
-	uniqueTopic := uniuri.New()
-	registration.Topic = uniqueTopic
-	data, err := json.Marshal(&registration)
-	log.Println("Registration Fulfilled")
-	log.Println(string(data))
-
-	message.Data = data
-	message.Topic = uniqueTopic
-	io.WriteString(w, string(data))
-	workers.AddJob(message)
 }
 
 func JoinTopic(w http.ResponseWriter, r *http.Request) {
-
+	if r.Method != "GET" {
+		w.Header().Set("Allow", "GET")
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+	defer r.Body.Close()
+	var registration workers.Registration
+	err := json.NewDecoder(r.Body).Decode(&registration)
+	if err == nil && (workers.Registration{}) != registration {
+		err = registration.JoinTopic()
+		data, err := json.Marshal(&registration)
+		if err == nil {
+			log.Println("Topic Joined")
+			io.WriteString(w, string(data))
+		} else {
+			log.Println(err)
+		}
+	}
 }
 
 func RefreshToken(w http.ResponseWriter, r *http.Request) {
@@ -71,4 +85,14 @@ func decoder(r *http.Request) (workers.WorkRequest, error) {
 	var message workers.WorkRequest
 	err := json.NewDecoder(r.Body).Decode(&message)
 	return message, err
+}
+
+func RequestDeviceId(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "GET" {
+
+	}
+}
+
+func SetDeviceIdFriendlyName(w http.ResponseWriter, r *http.Request) {
+
 }

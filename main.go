@@ -28,7 +28,7 @@ func main() {
 
 	http.HandleFunc("/reading", requests.Reading)
 	http.HandleFunc("/register", requests.Register)
-
+	http.HandleFunc("/jointopic", requests.JoinTopic)
 	var m letsencrypt.Manager
 	if err := m.CacheFile("letsencrypt.cache"); err != nil {
 		log.Fatal(err)
