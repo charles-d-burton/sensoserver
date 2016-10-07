@@ -15,8 +15,7 @@ var (
 )
 
 const (
-	bucketTopics     = "topics"
-	bucketFriendlies = "friendly"
+	bucketTopics = "topics"
 )
 
 func init() {
@@ -39,6 +38,11 @@ type Registration struct {
 	Token string `json:"token"`
 }
 
+type Tokens struct {
+	Tokens []string `json:"tokens"`
+}
+
+//Register ... Register a new endpoint device
 func (register Registration) Register() error {
 	token := make([]string, 0)
 	token = append(token, register.Token)
@@ -55,6 +59,7 @@ func (register Registration) Register() error {
 	return err
 }
 
+//JoinTopic ... Join a new endpoint device to an already created topic
 func (register Registration) JoinTopic() error {
 	err := boltDB.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(bucketTopics))
@@ -78,6 +83,7 @@ func (register Registration) JoinTopic() error {
 	return err
 }
 
+//LeaveTopic ... Remove a device token from a topic
 func (register Registration) LeaveTopic() error {
 	err := boltDB.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(bucketTopics))
@@ -98,12 +104,14 @@ func (register Registration) LeaveTopic() error {
 	return err
 }
 
+//RefreshToken ... Describes a struct to update a device token with a refreshed token
 type RefreshToken struct {
 	NewToken string `json:"newtoken"`
 	OldToken string `json:"oldtoken"`
 	Topic
 }
 
+//Refresh ... Logic to replace one token with another
 func (refreshToken RefreshToken) Refresh() error {
 	err := boltDB.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(bucketTopics))
@@ -123,8 +131,14 @@ func (refreshToken RefreshToken) Refresh() error {
 	return err
 }
 
-type Tokens struct {
-	Tokens []string `json:"tokens"`
+//Short and sweet function to update bolt
+func updateBolt(topic string, message []byte, bucket string) {
+	err := boltDB.Update(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte(bucket))
+		err := b.Put([]byte(topic), message)
+		return err
+	})
+	log.Println(err)
 }
 
 //Discover if the token is already in a topic
@@ -149,13 +163,4 @@ func findToken(token string) (bool, string) {
 		return nil
 	})
 	return found, topic
-}
-
-func updateBolt(topic string, message []byte, bucket string) {
-	err := boltDB.Update(func(tx *bolt.Tx) error {
-		b := tx.Bucket([]byte(bucket))
-		err := b.Put([]byte(topic), message)
-		return err
-	})
-	log.Println(err)
 }
