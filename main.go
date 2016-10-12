@@ -37,6 +37,7 @@ func main() {
 	http.HandleFunc("/jointopic", requests.JoinTopic)
 	http.HandleFunc("/leavetopic", requests.LeaveTopic)
 	http.HandleFunc("/refreshtoken", requests.RefreshToken)
+	http.HandleFunc("/registerdevice", requests.RegisterDevice)
 
 	app.Action = func(c *cli.Context) error {
 		if c.NArg() > 0 {

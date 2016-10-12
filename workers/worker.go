@@ -59,23 +59,9 @@ func (w *Worker) Stop() {
 }
 
 func handleWork(work *WorkRequest) {
-	log.Println(work.MessageType)
-	switch work.MessageType {
-	case "reading":
-		err := work.PublishToFirebase()
-		if err != nil {
-			log.Println(err)
-		}
+	//log.Println(work.MessageType)
+	err := work.PublishToFirebase()
+	if err != nil {
+		log.Println(err)
 	}
-
-}
-
-//Join a new Device to a topic
-func joinTopic(work *WorkRequest) {
-
-}
-
-//Invalidate and Refresh a Token
-func refreshToken(work *WorkRequest) {
-
 }

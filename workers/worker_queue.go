@@ -21,30 +21,40 @@ type Topic struct {
 }
 
 type WorkRequest struct {
-	Topic
-	Token       string `json:"token"`
-	MessageType string `json:"messagetype"`
-	Data        json.RawMessage
+	Sensor `json:"sensor"`
+	Data   json.RawMessage `json:"data"`
 }
 
-func (work WorkRequest) PublishToFirebase() error {
-	fcmClient := fcm.NewFcmClient(key)
+type Payload struct {
+	Device *string          `json:"device"`
+	Name   *string          `json:"name"`
+	Data   *json.RawMessage `json:"payload"`
+}
 
+func (work *WorkRequest) PublishToFirebase() error {
+	fcmClient := fcm.NewFcmClient(key)
+	//log.Println("Data: ", string(work.Data))
 	//Use a buffer to concat strings, it's much faster
 	buffer := bytes.NewBuffer(make([]byte, 0, 32))
 	buffer.WriteString("/topics/")
-	buffer.WriteString(work.Topic.TopicString)
+	buffer.WriteString(work.Sensor.Topic.TopicString)
 	topic := buffer.String()
 
-	log.Println("Topic:", topic)
-	fcmClient.NewFcmMsgTo(topic, work.Data)
+	payload := work.transformToPayload()
+	//data, err := json.Marshal(payload)
+	//log.Println("Payload: ", string(data))
+	fcmClient.NewFcmMsgTo(topic, payload)
 	fcmClient.SetTimeToLive(0)
 	status, err := fcmClient.Send()
-	if err == nil {
-		status.PrintResults()
-	} else {
+	if err != nil {
 		status.PrintResults()
 		log.Println(err)
+		//status.PrintResults()
 	}
 	return err
+}
+
+func (work *WorkRequest) transformToPayload() *Payload {
+	payload := Payload{Device: &work.Sensor.Device, Name: &work.Sensor.Name, Data: &work.Data}
+	return &payload
 }
