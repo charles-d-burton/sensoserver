@@ -172,27 +172,6 @@ func (sensor *Sensor) Register() error {
 	return err
 }
 
-//Change the the friendly name of a sensor
-/*func (sensor *Sensor) Update() error {
-	err := boltDB.View(func(tx *bolt.Tx) error {
-		var sensors Sensors
-		b := tx.Bucket([]byte(deviceBucket))
-		data := b.Get([]byte(sensor.Topic.TopicString))
-		err := json.Unmarshal(data, &sensors)
-		if err == nil {
-			sensors.Sensors[sensor.Device] = sensor.Name
-			data, err = json.Marshal(sensors.Sensors)
-			if err == nil {
-				log.Println(string(data))
-				go updateBolt(sensor.Topic.TopicString, data, deviceBucket)
-			}
-		}
-
-		return err
-	})
-	return err
-}*/
-
 func (sensor *Sensor) Exists() bool {
 	exists := false
 	boltDB.View(func(tx *bolt.Tx) error {
