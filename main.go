@@ -54,10 +54,10 @@ func main() {
 
 	http.HandleFunc("/reading", requests.Reading)
 	http.HandleFunc("/register", requests.Register)
-	http.HandleFunc("/jointopic", requests.JoinTopic)
-	http.HandleFunc("/leavetopic", requests.LeaveTopic)
-	http.HandleFunc("/refreshtoken", requests.RefreshToken)
-	http.HandleFunc("/registerdevice", requests.RegisterDevice)
+	http.HandleFunc("/register/jointopic", requests.JoinTopic)
+	http.HandleFunc("/register/leavetopic", requests.LeaveTopic)
+	http.HandleFunc("/register/refreshtoken", requests.RefreshToken)
+	http.HandleFunc("/register/registerdevice", requests.RegisterDevice)
 
 	app.Run(os.Args)
 
