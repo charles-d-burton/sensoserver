@@ -5,18 +5,12 @@ import (
 	"errors"
 	"io"
 	"log"
-	"math/rand"
 	"net/http"
 	"sensoserver/workers"
-	"time"
 
 	"github.com/dchest/uniuri"
 	uuid "github.com/satori/go.uuid"
 )
-
-func init() {
-	rand.Seed(time.Now().UnixNano())
-}
 
 /*
 register a new user with Google Cloud messaging

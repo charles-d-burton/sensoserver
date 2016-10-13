@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"log"
+	"os"
 	"sensoserver/helpers"
 
 	"github.com/boltdb/bolt"
@@ -11,7 +12,6 @@ import (
 
 var (
 	boltDB    *bolt.DB
-	boltDir   = "./senso.db"
 	words     = 2
 	separator = "-"
 )
@@ -20,21 +20,20 @@ const (
 	topicsBucket = "topics"
 )
 
-//Open the bolt database
-func init() {
-	db, err := bolt.Open(boltDir, 0600, nil)
+func StartBolt(boltDir string, boltPerms os.FileMode) error {
+	db, err := bolt.Open(boltDir, boltPerms, nil)
 	if err != nil {
 		panic(err)
 	}
 	boltDB = db
-	boltDB.Update(func(tx *bolt.Tx) error {
+	err = boltDB.Update(func(tx *bolt.Tx) error {
 		_, err := tx.CreateBucketIfNotExists([]byte(topicsBucket))
 		if err != nil {
 			log.Println(err)
 		}
 		return nil
 	})
-
+	return err
 }
 
 //Registration ... object to hold a registration request

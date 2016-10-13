@@ -17,6 +17,7 @@ import (
 var (
 	nWorkers = runtime.NumCPU()
 	port     string
+	database string
 )
 
 func main() {
@@ -24,23 +25,14 @@ func main() {
 	//Start the work dispatcher
 	key := os.Getenv("APIKEY")
 	app := processCLI()
-
-	workers.StartDispatcher(nWorkers, strings.Trim(key, " "))
-
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "Hello, TLS!\n")
-	})
-
-	http.HandleFunc("/reading", requests.Reading)
-	http.HandleFunc("/register", requests.Register)
-	http.HandleFunc("/jointopic", requests.JoinTopic)
-	http.HandleFunc("/leavetopic", requests.LeaveTopic)
-	http.HandleFunc("/refreshtoken", requests.RefreshToken)
-	http.HandleFunc("/registerdevice", requests.RegisterDevice)
-
 	app.Action = func(c *cli.Context) error {
 		if c.NArg() > 0 {
 			//TODO: Do something with args
+		}
+		log.Println("Database initialized at: ", database)
+		err := workers.StartBolt(database, 0600)
+		if err != nil {
+			panic(err)
 		}
 		if c.String("ssl") == "on" {
 			var m letsencrypt.Manager
@@ -54,7 +46,21 @@ func main() {
 		}
 		return nil
 	}
+	workers.StartDispatcher(nWorkers, strings.Trim(key, " "))
+
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintf(w, "Hello, TLS!\n")
+	})
+
+	http.HandleFunc("/reading", requests.Reading)
+	http.HandleFunc("/register", requests.Register)
+	http.HandleFunc("/jointopic", requests.JoinTopic)
+	http.HandleFunc("/leavetopic", requests.LeaveTopic)
+	http.HandleFunc("/refreshtoken", requests.RefreshToken)
+	http.HandleFunc("/registerdevice", requests.RegisterDevice)
+
 	app.Run(os.Args)
+
 	//conn.Close()
 }
 
@@ -71,6 +77,12 @@ func processCLI() *cli.App {
 			Value:       "8901",
 			Usage:       "Set listening port for unencrypted traffic\n                 Only used if --ssl is set to off",
 			Destination: &port,
+		},
+		cli.StringFlag{
+			Name:        "database, d",
+			Value:       "./senso.db",
+			Usage:       "Directory and file to save the persistence database",
+			Destination: &database,
 		},
 	}
 	return app
