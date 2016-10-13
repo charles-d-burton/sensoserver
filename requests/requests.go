@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/dchest/uniuri"
-	petname "github.com/dustinkirkland/golang-petname"
 	uuid "github.com/satori/go.uuid"
 )
 
@@ -38,6 +37,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+//JoinTopic ... with a given topic join the token to the topic, this token will receive messages from FCM
 func JoinTopic(w http.ResponseWriter, r *http.Request) {
 	registration, err := decodeRegistration(w, r)
 	if err == nil {
@@ -52,6 +52,7 @@ func JoinTopic(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+//LeaveTopic ... Remove a given token from a topic
 func LeaveTopic(w http.ResponseWriter, r *http.Request) {
 	registration, err := decodeRegistration(w, r)
 	if err == nil {
@@ -59,10 +60,12 @@ func LeaveTopic(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+//RecoverTopic ... Will eventually return a way to recover tokens from a topic
 func RecoverTopic(w http.ResponseWriter, r *http.Request) {
 
 }
 
+//Load a registration request into a struct
 func decodeRegistration(w http.ResponseWriter, r *http.Request) (*workers.Registration, error) {
 	defer r.Body.Close()
 	if r.Method != "GET" {
@@ -75,6 +78,7 @@ func decodeRegistration(w http.ResponseWriter, r *http.Request) (*workers.Regist
 	return &registration, err
 }
 
+//RefreshToken ... Replace an expired token with a new one
 func RefreshToken(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	if r.Method != "GET" {
@@ -89,6 +93,7 @@ func RefreshToken(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+//Reading ... process sensor data input
 func Reading(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		w.Header().Set("Allow", "POST")
@@ -107,6 +112,7 @@ func Reading(w http.ResponseWriter, r *http.Request) {
 	workers.AddJob(*message)
 }
 
+//Helper to decode messages
 func decoder(r *http.Request) (*workers.WorkRequest, error) {
 	defer r.Body.Close()
 	var message workers.WorkRequest
@@ -119,6 +125,7 @@ func decoder(r *http.Request) (*workers.WorkRequest, error) {
 	}
 }
 
+//RegisterDevice ... Register a new sensor with a given topic
 func RegisterDevice(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	if r.Method != "GET" {
@@ -132,7 +139,6 @@ func RegisterDevice(w http.ResponseWriter, r *http.Request) {
 	//Assign a unique id and a friendly name to connected device
 	id := uuid.NewV4()
 	device.Device = id.String()
-	device.Name = petname.Generate(2, "-")
 	if err != nil || device.Topic.TopicString == "" {
 		w.WriteHeader(http.StatusForbidden)
 		w.Write([]byte("☄ HTTP status code returned!"))

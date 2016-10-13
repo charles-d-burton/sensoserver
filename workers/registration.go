@@ -20,6 +20,7 @@ const (
 	topicsBucket = "topics"
 )
 
+//Open the bolt database
 func init() {
 	db, err := bolt.Open(boltDir, 0600, nil)
 	if err != nil {
@@ -36,11 +37,13 @@ func init() {
 
 }
 
+//Registration ... object to hold a registration request
 type Registration struct {
 	Topic
 	Token string `json:"token"`
 }
 
+//Devices ... object to hold tokens for Android/IOS/Web and Sensors
 type Devices struct {
 	Tokens  []string `json:"tokens"`
 	Sensors []string `json:"sensors"`
@@ -135,17 +138,16 @@ func (refreshToken *RefreshToken) Refresh() error {
 	return err
 }
 
+/*
+Sensor ... Describes a struct containing a sensor device and a topic with optional friendly name
+*/
 type Sensor struct {
 	Topic
 	Device string `json:"device"`
 	Name   string `json:"name,omitempty"`
 }
 
-/*type Sensors struct {
-	Topic
-	Sensors map[string]string `json:"sensors"`
-}*/
-
+//Register ... Register a device and persist it in bolt
 func (sensor *Sensor) Register() error {
 
 	log.Println("Topic: ", sensor.Topic.TopicString)
@@ -172,6 +174,7 @@ func (sensor *Sensor) Register() error {
 	return err
 }
 
+//Exists ... Check if a sensor by the id given has been registered with its topic
 func (sensor *Sensor) Exists() bool {
 	exists := false
 	boltDB.View(func(tx *bolt.Tx) error {
