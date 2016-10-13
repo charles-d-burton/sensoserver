@@ -13,6 +13,7 @@ go get the following packages:
 "github.com/NaySoftware/go-fcm"
 "rsc.io/letsencrypt"
 "github.com/urfave/cli"
+"github.com/boltdb/bolt"
 
 Simply clone the repo and run with go run main.go --ssl off --port 8081
 
