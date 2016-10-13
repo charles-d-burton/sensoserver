@@ -7,7 +7,7 @@ import (
 	"log"
 	"math/rand"
 	"net/http"
-	"tempserver/workers"
+	"sensoserver/workers"
 	"time"
 
 	"github.com/dchest/uniuri"

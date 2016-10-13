@@ -6,12 +6,11 @@ import (
 	"net/http"
 	"os"
 	"runtime"
+	"sensoserver/requests"
+	"sensoserver/workers"
 	"strings"
-	"tempserver/requests"
-	"tempserver/workers"
 
 	"github.com/urfave/cli"
-
 	"rsc.io/letsencrypt"
 )
 
