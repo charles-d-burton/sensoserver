@@ -61,6 +61,7 @@ func (w *Worker) Stop() {
 func handleWork(work *WorkRequest) {
 	//log.Println(work.MessageType)
 	err := work.PublishToFirebase()
+	err = work.PublishToNSQ()
 	if err != nil {
 		log.Println(err)
 	}

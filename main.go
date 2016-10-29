@@ -18,6 +18,9 @@ var (
 	nWorkers = runtime.NumCPU()
 	port     string
 	database string
+	queue    string
+	nsqPort  string
+	nsqHost  string
 )
 
 func main() {
@@ -43,6 +46,8 @@ func main() {
 		} else if c.String("ssl") == "off" {
 			log.Println("Listening on port ", port)
 			log.Fatal(http.ListenAndServe("localhost:"+port, nil))
+		} else if c.String("queue") != "firebase" {
+			setupQueue(queue, nsqHost, nsqPort)
 		}
 		return nil
 	}
@@ -64,6 +69,13 @@ func main() {
 	//conn.Close()
 }
 
+func setupQueue(queueType, host, port string) {
+	if queueType == "both" || queueType == "nsq" {
+		workers.SetQueueType(queueType)
+		workers.SetupNSQ(host, port)
+	}
+}
+
 func processCLI() *cli.App {
 	app := cli.NewApp()
 	app.Flags = []cli.Flag{
@@ -83,6 +95,24 @@ func processCLI() *cli.App {
 			Value:       "./senso.db",
 			Usage:       "Directory and file to save the persistence database",
 			Destination: &database,
+		},
+		cli.StringFlag{
+			Name:        "queue, q",
+			Value:       "firebase",
+			Usage:       "Select either \"firebase\", \"nsq\", or \"both\".  Firebase sends to firebase cloud messaging, NSQ uses nsq.io",
+			Destination: &queue,
+		},
+		cli.StringFlag{
+			Name:        "nsqport, np",
+			Value:       "4150",
+			Usage:       "Set the port to connect to nsq",
+			Destination: &nsqPort,
+		},
+		cli.StringFlag{
+			Name:        "nsqhost, nh",
+			Value:       "localhost",
+			Usage:       "Set the NSQ host to connect to",
+			Destination: &nsqHost,
 		},
 	}
 	return app
