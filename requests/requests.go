@@ -17,6 +17,7 @@ register a new user with Google Cloud messaging
 */
 func Register(w http.ResponseWriter, r *http.Request) {
 	registration, err := decodeRegistration(w, r)
+	log.Println(registration.TopicString)
 	if err == nil {
 		registration.Topic.TopicString = uniuri.New()
 		registration.Register()
@@ -62,8 +63,8 @@ func RecoverTopic(w http.ResponseWriter, r *http.Request) {
 //Load a registration request into a struct
 func decodeRegistration(w http.ResponseWriter, r *http.Request) (*workers.Registration, error) {
 	defer r.Body.Close()
-	if r.Method != "GET" {
-		w.Header().Set("Allow", "GET")
+	if r.Method != "POST" {
+		w.Header().Set("Allow", "POST")
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return nil, errors.New("Method not allowed")
 	}
@@ -75,8 +76,8 @@ func decodeRegistration(w http.ResponseWriter, r *http.Request) (*workers.Regist
 //RefreshToken ... Replace an expired token with a new one
 func RefreshToken(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
-	if r.Method != "GET" {
-		w.Header().Set("Allow", "GET")
+	if r.Method != "POST" {
+		w.Header().Set("Allow", "POST")
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
@@ -122,8 +123,8 @@ func decoder(r *http.Request) (*workers.WorkRequest, error) {
 //RegisterDevice ... Register a new sensor with a given topic
 func RegisterDevice(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
-	if r.Method != "GET" {
-		w.Header().Set("Allow", "GET")
+	if r.Method != "POST" {
+		w.Header().Set("Allow", "POST")
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
