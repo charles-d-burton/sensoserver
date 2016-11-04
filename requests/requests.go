@@ -17,7 +17,7 @@ register a new user with Google Cloud messaging
 */
 func Register(w http.ResponseWriter, r *http.Request) {
 	registration, err := decodeRegistration(w, r)
-	log.Println(registration.TopicString)
+	//log.Println(registration.TopicString)
 	if err == nil {
 		registration.Topic.TopicString = uniuri.New()
 		registration.Register()
