@@ -11,7 +11,6 @@ import (
 	"sensoserver/workers"
 	"strings"
 
-	"github.com/hashicorp/mdns"
 	"github.com/urfave/cli"
 	"rsc.io/letsencrypt"
 )
@@ -26,14 +25,6 @@ var (
 )
 
 func main() {
-	// Setup our service export
-	host, _ := os.Hostname()
-	info := []string{"My awesome service"}
-	service, _ := mdns.NewMDNSService(host, "_sensorelay._tcp", "", "", 8000, getLocalIPS(), info)
-
-	// Create the mDNS server, defer shutdown
-	server, _ := mdns.NewServer(&mdns.Config{Zone: service})
-	defer server.Shutdown()
 	//runtime.GOMAXPROCS(runtime.NumCPU())
 	//Start the work dispatcher
 	key := os.Getenv("APIKEY")

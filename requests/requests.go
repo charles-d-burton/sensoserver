@@ -95,7 +95,7 @@ func Reading(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
-
+	log.Println("Recieved Reading Request")
 	message, err := decoder(r)
 	if err != nil {
 		errorMessage := "Device not found: " + message.Sensor.Device
