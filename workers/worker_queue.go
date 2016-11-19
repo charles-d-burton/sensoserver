@@ -44,7 +44,7 @@ func SetupNSQ(host, port string) {
 }
 
 type Topic struct {
-	TopicString string `json:"topic"`
+	TopicString string `json:"topic,omitempty"`
 }
 
 type WorkRequest struct {

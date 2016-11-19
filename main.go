@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"runtime"
@@ -10,6 +11,7 @@ import (
 	"sensoserver/workers"
 	"strings"
 
+	"github.com/hashicorp/mdns"
 	"github.com/urfave/cli"
 	"rsc.io/letsencrypt"
 )
@@ -24,6 +26,14 @@ var (
 )
 
 func main() {
+	// Setup our service export
+	host, _ := os.Hostname()
+	info := []string{"My awesome service"}
+	service, _ := mdns.NewMDNSService(host, "_sensorelay._tcp", "", "", 8000, getLocalIPS(), info)
+
+	// Create the mDNS server, defer shutdown
+	server, _ := mdns.NewServer(&mdns.Config{Zone: service})
+	defer server.Shutdown()
 	//runtime.GOMAXPROCS(runtime.NumCPU())
 	//Start the work dispatcher
 	key := os.Getenv("APIKEY")
@@ -116,4 +126,22 @@ func processCLI() *cli.App {
 		},
 	}
 	return app
+}
+
+// GetLocalIP returns the non loopback local IP of the host
+func getLocalIPS() []net.IP {
+	addrs, err := net.InterfaceAddrs()
+	if err != nil {
+		return nil
+	}
+	var ips []net.IP
+	for _, address := range addrs {
+		// check the address type and if it is not a loopback the display it
+		if ipnet, ok := address.(*net.IPNet); ok && !ipnet.IP.IsLoopback() && ipnet.IP.String() != "127.0.1.1" {
+			if ipnet.IP.To4() != nil {
+				ips = append(ips, ipnet.IP)
+			}
+		}
+	}
+	return ips
 }
