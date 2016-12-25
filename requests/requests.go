@@ -3,14 +3,31 @@ package requests
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
+	"sensorelay/assets"
 	"sensoserver/workers"
 
 	"github.com/dchest/uniuri"
 	uuid "github.com/satori/go.uuid"
 )
+
+/*
+Handle main page requests
+*/
+func Index(w http.ResponseWriter, r *http.Request) {
+	log.Println("Handling Index Request: ")
+	defer r.Body.Close()
+	if r.Method != "GET" {
+		log.Println("Method not GET")
+		w.Header().Set("Allow", "GET")
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+	fmt.Fprintf(w, assets.HtmlIndex)
+}
 
 /*
 register a new user with Google Cloud messaging
