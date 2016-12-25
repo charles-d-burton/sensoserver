@@ -9,7 +9,6 @@ import (
 	"sensoserver/workers"
 	"strings"
 
-	"github.com/aws/aws-sdk-go/aws/request"
 	"github.com/urfave/cli"
 	"rsc.io/letsencrypt"
 )
@@ -54,7 +53,7 @@ func main() {
 	workers.StartDispatcher(nWorkers, strings.Trim(key, " "))
 
 	http.HandleFunc("/", requests.Index)
-	http.HandleFunc("/login", request.HandleGoogleLogin)
+	http.HandleFunc("/login", requests.HandleGoogleLogin)
 	http.HandleFunc("/callback", requests.HandleGoogleCallback)
 
 	http.HandleFunc("/reading", requests.Reading)
