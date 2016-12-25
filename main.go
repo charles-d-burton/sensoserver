@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -53,9 +52,7 @@ func main() {
 	}
 	workers.StartDispatcher(nWorkers, strings.Trim(key, " "))
 
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "Hello, TLS!\n")
-	})
+	http.HandleFunc("/", requests.Index)
 
 	http.HandleFunc("/reading", requests.Reading)
 	http.HandleFunc("/register", requests.Register)
