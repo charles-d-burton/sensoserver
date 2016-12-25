@@ -5,13 +5,32 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"sensoserver/assets"
 	"sensoserver/workers"
 
+	"golang.org/x/oauth2"
+	"golang.org/x/oauth2/google"
+
+	"os"
+
 	"github.com/dchest/uniuri"
 	uuid "github.com/satori/go.uuid"
+)
+
+var (
+	googleOauthConfig = &oauth2.Config{
+		RedirectURL:  "https://smoker-relay.us/callback",
+		ClientID:     os.Getenv("CLIENTID"),
+		ClientSecret: os.Getenv("CLIENTSECRET"),
+		Scopes: []string{"https://www.googleapis.com/auth/userinfo.profile",
+			"https://www.googleapis.com/auth/userinfo.email"},
+		Endpoint: google.Endpoint,
+	}
+	// Some random string, random for each request
+	oauthStateString = "random"
 )
 
 /*
@@ -27,6 +46,41 @@ func Index(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	fmt.Fprintf(w, assets.HtmlIndex)
+}
+
+/*
+Google Login code
+*/
+func HandleGoogleLogin(w http.ResponseWriter, r *http.Request) {
+	url := googleOauthConfig.AuthCodeURL(oauthStateString)
+	http.Redirect(w, r, url, http.StatusTemporaryRedirect)
+}
+
+/*
+Google Callback code
+*/
+
+func HandleGoogleCallback(w http.ResponseWriter, r *http.Request) {
+	state := r.FormValue("state")
+	if state != oauthStateString {
+		fmt.Printf("invalid oauth state, expected '%s', got '%s'\n", oauthStateString, state)
+		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+		return
+	}
+
+	code := r.FormValue("code")
+	token, err := googleOauthConfig.Exchange(oauth2.NoContext, code)
+	if err != nil {
+		fmt.Println("Code exchange failed with '%s'\n", err)
+		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+		return
+	}
+
+	response, err := http.Get("https://www.googleapis.com/oauth2/v2/userinfo?access_token=" + token.AccessToken)
+
+	defer response.Body.Close()
+	contents, err := ioutil.ReadAll(response.Body)
+	fmt.Fprintf(w, "Content: %s\n", contents)
 }
 
 /*
