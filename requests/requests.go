@@ -7,7 +7,7 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"sensorelay/assets"
+	"sensoserver/assets"
 	"sensoserver/workers"
 
 	"github.com/dchest/uniuri"
