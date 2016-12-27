@@ -13,6 +13,8 @@ import (
 	"rsc.io/letsencrypt"
 )
 
+//go:generate /home/charles/GoDev/bin/go-bindata -prefix "assets/" -pkg requests -o ./requests/bindata.go assets/...
+
 var (
 	nWorkers = runtime.NumCPU()
 	port     string

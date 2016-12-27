@@ -1,6 +1,7 @@
 package requests
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -37,7 +38,6 @@ var (
 Handle main page requests
 */
 func Index(w http.ResponseWriter, r *http.Request) {
-	log.Println("Handling Index Request: ")
 	defer r.Body.Close()
 	if r.Method != "GET" {
 		log.Println("Method not GET")
@@ -45,7 +45,21 @@ func Index(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
-	fmt.Fprintf(w, assets.HtmlIndex)
+	log.Println("Handling Index Request: ")
+	path string := r.URL.Path
+	if path == "" {
+		path = "index.html"
+	}
+	if bs, err := Asset(path); err != nil {
+		w.WriteHeader(http.StatusNotFound)
+	} else {
+		var reader = bytes.NewBuffer(bs)
+		io.Copy(w, reader)
+	}
+	
+	
+	
+	//fmt.Fprintf(w, assets.HtmlIndex)
 }
 
 /*
