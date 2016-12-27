@@ -45,10 +45,10 @@ func Index(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	log.Println("Handling Index Request: ")
-	path := r.URL.Path
-	if path == "" {
-		path = "index.html"
-	}
+	//path := r.URL.Path
+	//if path == "" {
+	path := "index.html"
+	//}
 	log.Println(path)
 	if bs, err := Asset(path); err != nil {
 		log.Println(err)
