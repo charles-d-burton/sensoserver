@@ -9,7 +9,6 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"sensoserver/assets"
 	"sensoserver/workers"
 
 	"golang.org/x/oauth2"
@@ -46,7 +45,7 @@ func Index(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	log.Println("Handling Index Request: ")
-	path string := r.URL.Path
+	path := r.URL.Path
 	if path == "" {
 		path = "index.html"
 	}
@@ -56,9 +55,6 @@ func Index(w http.ResponseWriter, r *http.Request) {
 		var reader = bytes.NewBuffer(bs)
 		io.Copy(w, reader)
 	}
-	
-	
-	
 	//fmt.Fprintf(w, assets.HtmlIndex)
 }
 
