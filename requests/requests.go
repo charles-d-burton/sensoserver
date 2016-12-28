@@ -45,21 +45,15 @@ func Index(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	log.Println("Handling Index Request: ")
-	//path := r.URL.Path
-	//if path == "" {
 	path := "index.html"
-	//}
 	log.Println(path)
 	if bs, err := Asset(path); err != nil {
 		log.Println(err)
 		w.WriteHeader(http.StatusNotFound)
 	} else {
 		var reader = bytes.NewBuffer(bs)
-		log.Println("Index Contents: ")
-		log.Println(string(bs[:]))
 		io.Copy(w, reader)
 	}
-	//fmt.Fprintf(w, assets.HtmlIndex)
 }
 
 /*
