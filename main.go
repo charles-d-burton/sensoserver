@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net"
 	"net/http"
@@ -15,6 +14,8 @@ import (
 	"github.com/urfave/cli"
 	"rsc.io/letsencrypt"
 )
+
+//go:generate /home/charles/GoDev/bin/go-bindata -prefix "assets/" -pkg requests -o ./requests/bindata.go assets/...
 
 var (
 	nWorkers = runtime.NumCPU()
@@ -63,9 +64,9 @@ func main() {
 	}
 	workers.StartDispatcher(nWorkers, strings.Trim(key, " "))
 
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "Hello, TLS!\n")
-	})
+	http.HandleFunc("/", requests.Index)
+	http.HandleFunc("/login", requests.HandleGoogleLogin)
+	http.HandleFunc("/callback", requests.HandleGoogleCallback)
 
 	http.HandleFunc("/reading", requests.Reading)
 	http.HandleFunc("/register", requests.Register)
