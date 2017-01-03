@@ -15,7 +15,7 @@ import (
 	"rsc.io/letsencrypt"
 )
 
-//go:generate /home/charles/GoDev/bin/go-bindata -prefix "assets/" -pkg requests -o ./requests/bindata.go assets/...
+//go:generate go-bindata -prefix "assets/" -pkg requests -o -ignore "assets/node_modules/" ./requests/bindata.go assets/...
 
 var (
 	nWorkers = runtime.NumCPU()
@@ -65,6 +65,7 @@ func main() {
 	workers.StartDispatcher(nWorkers, strings.Trim(key, " "))
 
 	http.HandleFunc("/", requests.Index)
+	http.HandleFunc("/pages/", requests.Pages)
 	http.HandleFunc("/login", requests.HandleGoogleLogin)
 	http.HandleFunc("/callback", requests.HandleGoogleCallback)
 

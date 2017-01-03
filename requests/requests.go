@@ -57,6 +57,29 @@ func Index(w http.ResponseWriter, r *http.Request) {
 }
 
 /*
+Handle lower page requests
+*/
+func Pages(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	if r.Method != "GET" {
+		log.Println("Method not GET")
+		w.Header().Set("Allow", "GET")
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+
+	path := r.URL.Path[1:len(r.URL.Path)]
+	log.Println("PATH:", path)
+	if bs, err := Asset(path); err != nil {
+		log.Println(err)
+		w.WriteHeader(http.StatusNotFound)
+	} else {
+		var reader = bytes.NewBuffer(bs)
+		io.Copy(w, reader)
+	}
+}
+
+/*
 Google Login code
 */
 func HandleGoogleLogin(w http.ResponseWriter, r *http.Request) {
