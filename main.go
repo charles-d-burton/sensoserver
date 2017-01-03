@@ -15,7 +15,7 @@ import (
 	"rsc.io/letsencrypt"
 )
 
-//go:generate go-bindata -prefix "assets/" -pkg requests -o -ignore "assets/node_modules/" ./requests/bindata.go assets/...
+//go:generate go-bindata -prefix "assets/" -pkg requests -ignore "assets/node_modules/" -ignore "assets/bower_components/" -o ./requests/bindata.go assets/...
 
 var (
 	nWorkers = runtime.NumCPU()
