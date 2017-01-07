@@ -65,7 +65,7 @@ func main() {
 	workers.StartDispatcher(nWorkers, strings.Trim(key, " "))
 
 	http.HandleFunc("/", requests.Index)
-	http.HandleFunc("/pages/", requests.Pages)
+	//http.HandleFunc("/pages/", requests.Pages)
 	http.HandleFunc("/login", requests.HandleGoogleLogin)
 	http.HandleFunc("/callback", requests.HandleGoogleCallback)
 
