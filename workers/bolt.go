@@ -10,6 +10,7 @@ import (
 const (
 	topicsBucket = "topics"
 	usersBucket  = "users"
+	apiBucket    = "api"
 )
 
 var (
@@ -27,6 +28,7 @@ func StartBolt(boltDir string, boltPerms os.FileMode) error {
 	err = boltDB.Update(func(tx *bolt.Tx) error {
 		create, err := tx.CreateBucketIfNotExists([]byte(topicsBucket))
 		create, err = tx.CreateBucketIfNotExists([]byte(usersBucket))
+		create, err = tx.CreateBucketIfNotExists([]byte(apiBucket))
 		log.Println("Stats: ", create.Stats().Depth)
 		if err != nil {
 			log.Println(err)
