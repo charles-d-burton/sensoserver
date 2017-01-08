@@ -4,37 +4,10 @@ import (
 	"encoding/json"
 	"errors"
 	"log"
-	"os"
 	"sensoserver/helpers"
 
 	"github.com/boltdb/bolt"
 )
-
-var (
-	boltDB    *bolt.DB
-	words     = 2
-	separator = "-"
-)
-
-const (
-	topicsBucket = "topics"
-)
-
-func StartBolt(boltDir string, boltPerms os.FileMode) error {
-	db, err := bolt.Open(boltDir, boltPerms, nil)
-	if err != nil {
-		panic(err)
-	}
-	boltDB = db
-	err = boltDB.Update(func(tx *bolt.Tx) error {
-		_, err := tx.CreateBucketIfNotExists([]byte(topicsBucket))
-		if err != nil {
-			log.Println(err)
-		}
-		return nil
-	})
-	return err
-}
 
 //Registration ... object to hold a registration request
 type Registration struct {
@@ -192,16 +165,6 @@ func (sensor *Sensor) Exists() bool {
 		return err
 	})
 	return exists
-}
-
-//Short and sweet function to update bolt
-func updateBolt(topic string, message []byte, bucket string) {
-	err := boltDB.Update(func(tx *bolt.Tx) error {
-		b := tx.Bucket([]byte(bucket))
-		err := b.Put([]byte(topic), message)
-		return err
-	})
-	log.Println(err)
 }
 
 //Discover if the token is already in a topic

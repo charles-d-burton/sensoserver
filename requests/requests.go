@@ -4,33 +4,19 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"sensoserver/workers"
 
-	"golang.org/x/oauth2"
-	"golang.org/x/oauth2/google"
-
-	"os"
+	"google.golang.org/api/oauth2/v2"
 
 	"github.com/dchest/uniuri"
 	uuid "github.com/satori/go.uuid"
 )
 
 var (
-	googleOauthConfig = &oauth2.Config{
-		RedirectURL:  "https://smoker-relay.us/callback",
-		ClientID:     os.Getenv("CLIENTID"),
-		ClientSecret: os.Getenv("CLIENTSECRET"),
-		Scopes: []string{"https://www.googleapis.com/auth/userinfo.profile",
-			"https://www.googleapis.com/auth/userinfo.email"},
-		Endpoint: google.Endpoint,
-	}
-	// Some random string, random for each request
-	oauthStateString = "random"
+	httpClient = &http.Client{}
 )
 
 /*
@@ -44,8 +30,11 @@ func Index(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
-	log.Println("Handling Index Request: ")
 	path := "index.html"
+	if r.URL.Path != "/" {
+		path = r.URL.Path[1:len(r.URL.Path)]
+	}
+	w.Header().Add("Content-Type", getContentType(path))
 	log.Println(path)
 	if bs, err := Asset(path); err != nil {
 		log.Println(err)
@@ -57,61 +46,28 @@ func Index(w http.ResponseWriter, r *http.Request) {
 }
 
 /*
-Handle lower page requests
-*/
-func Pages(w http.ResponseWriter, r *http.Request) {
-	defer r.Body.Close()
-	if r.Method != "GET" {
-		log.Println("Method not GET")
-		w.Header().Set("Allow", "GET")
-		w.WriteHeader(http.StatusMethodNotAllowed)
-		return
-	}
-
-	path := r.URL.Path[1:len(r.URL.Path)]
-	log.Println("PATH:", path)
-	if bs, err := Asset(path); err != nil {
-		log.Println(err)
-		w.WriteHeader(http.StatusNotFound)
-	} else {
-		var reader = bytes.NewBuffer(bs)
-		io.Copy(w, reader)
-	}
-}
-
-/*
-Google Login code
-*/
-func HandleGoogleLogin(w http.ResponseWriter, r *http.Request) {
-	url := googleOauthConfig.AuthCodeURL(oauthStateString)
-	http.Redirect(w, r, url, http.StatusTemporaryRedirect)
-}
-
-/*
 Google Callback code
 */
 
 func HandleGoogleCallback(w http.ResponseWriter, r *http.Request) {
-	state := r.FormValue("state")
-	if state != oauthStateString {
-		fmt.Printf("invalid oauth state, expected '%s', got '%s'\n", oauthStateString, state)
-		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
-		return
-	}
-
-	code := r.FormValue("code")
-	token, err := googleOauthConfig.Exchange(oauth2.NoContext, code)
+	/*requestDump, err := httputil.DumpRequest(r, true)
 	if err != nil {
-		fmt.Println("Code exchange failed with '%s'\n", err)
-		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
-		return
+		log.Println(err)
 	}
-
-	response, err := http.Get("https://www.googleapis.com/oauth2/v2/userinfo?access_token=" + token.AccessToken)
-
-	defer response.Body.Close()
-	contents, err := ioutil.ReadAll(response.Body)
-	fmt.Fprintf(w, "Content: %s\n", contents)
+	log.Println(string(requestDump))*/
+	token := r.FormValue("idtoken")
+	oauth2Service, err := oauth2.New(httpClient)
+	tokenInfoCall := oauth2Service.Tokeninfo()
+	tokenInfoCall.IdToken(token)
+	tokenInfo, err := tokenInfoCall.Do()
+	if err != nil {
+		log.Println(err)
+	}
+	user, err := workers.GetUser(tokenInfo.UserId, tokenInfo.Email)
+	log.Println("Error:", err)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(user)
+	log.Println(user.Email)
 }
 
 /*
