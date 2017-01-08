@@ -67,11 +67,11 @@ func main() {
 	http.HandleFunc("/google-token", requests.HandleGoogleCallback)
 
 	http.HandleFunc("/reading", requests.Reading)
-	http.HandleFunc("/register", requests.Register)
-	http.HandleFunc("/register/jointopic", requests.JoinTopic)
-	http.HandleFunc("/register/leavetopic", requests.LeaveTopic)
-	http.HandleFunc("/register/refreshtoken", requests.RefreshToken)
-	http.HandleFunc("/register/registerdevice", requests.RegisterDevice)
+	//http.HandleFunc("/register", requests.Register)
+	//http.HandleFunc("/register/jointopic", requests.JoinTopic)
+	//http.HandleFunc("/register/leavetopic", requests.LeaveTopic)
+	//http.HandleFunc("/register/refreshtoken", requests.RefreshToken)
+	//http.HandleFunc("/register/registerdevice", requests.RegisterDevice)
 
 	app.Run(os.Args)
 
