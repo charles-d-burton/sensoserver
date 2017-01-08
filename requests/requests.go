@@ -171,6 +171,8 @@ func decoder(r *http.Request) (*workers.WorkRequest, error) {
 	defer r.Body.Close()
 	var message workers.WorkRequest
 	err := json.NewDecoder(r.Body).Decode(&message)
+	data, err := json.Marshal(message)
+	log.Println("Decoded message:",string(data))
 	return &message, err
 	/*if message.Sensor.Exists() {
 		log.Println("Found the sensor")
