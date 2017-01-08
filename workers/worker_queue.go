@@ -7,6 +7,7 @@ import (
 
 	"github.com/NaySoftware/go-fcm"
 	nsq "github.com/bitly/go-nsq"
+	"github.com/boltdb/bolt"
 )
 
 var (
@@ -48,8 +49,9 @@ type Topic struct {
 }
 
 type WorkRequest struct {
-	Sensor `json:"sensor"`
-	Data   json.RawMessage `json:"data"`
+	//Sensor `json:"sensor"`
+	Token string          `json:"token"`
+	Data  json.RawMessage `json:"data"`
 }
 
 type Payload struct {
@@ -59,19 +61,19 @@ type Payload struct {
 }
 
 func (work *WorkRequest) PublishToFirebase() error {
-	if useFirebase {
+	if useFirebase && work.verifyAPIKey() {
 		fcmClient := fcm.NewFcmClient(key)
 		//log.Println("Data: ", string(work.Data))
 		//Use a buffer to concat strings, it's much faster
 		buffer := bytes.NewBuffer(make([]byte, 0, 32))
 		buffer.WriteString("/topics/")
-		buffer.WriteString(work.Sensor.Topic.TopicString)
+		buffer.WriteString(work.Token)
 		topic := buffer.String()
 
-		payload := work.transformToPayload()
+		//payload := work.transformToPayload()
 		//data, err := json.Marshal(payload)
 		//log.Println("Payload: ", string(data))
-		fcmClient.NewFcmMsgTo(topic, payload)
+		fcmClient.NewFcmMsgTo(topic, work.Data)
 		fcmClient.SetTimeToLive(0)
 		status, err := fcmClient.Send()
 		if err != nil {
@@ -86,13 +88,27 @@ func (work *WorkRequest) PublishToFirebase() error {
 
 func (work *WorkRequest) PublishToNSQ() error {
 	if useNSQ {
-		err := pub.Publish(work.Topic.TopicString, []byte(work.Data))
-		return err
+		//err := pub.Publish(work.Topic.TopicString, []byte(work.Data))
+		//return err
 	}
 	return nil
 }
 
 func (work *WorkRequest) transformToPayload() *Payload {
-	payload := Payload{Device: &work.Sensor.Device, Name: &work.Sensor.Name, Data: &work.Data}
-	return &payload
+	//payload := Payload{Device: &work.Sensor.Device, Name: &work.Sensor.Name, Data: &work.Data}
+	//return &payload
+	return nil
+}
+
+func (work *WorkRequest) verifyAPIKey() bool {
+	valid := false
+	boltDB.View(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte(apiBucket))
+		data := b.Get([]byte(work.Token))
+		if string(data) == "valid" {
+			valid = true
+		}
+		return nil
+	})
+	return valid
 }
