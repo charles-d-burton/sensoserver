@@ -174,12 +174,6 @@ func decoder(r *http.Request) (*workers.WorkRequest, error) {
 	data, err := json.Marshal(message)
 	log.Println("Decoded message:",string(data))
 	return &message, err
-	/*if message.Sensor.Exists() {
-		log.Println("Found the sensor")
-		return &message, err
-	} else {
-		return &message, errors.New("Device Not Found")
-	}*/
 }
 
 //RegisterDevice ... Register a new sensor with a given topic
