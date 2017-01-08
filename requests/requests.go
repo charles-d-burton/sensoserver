@@ -156,9 +156,9 @@ func Reading(w http.ResponseWriter, r *http.Request) {
 
 	message, err := decoder(r)
 	if err != nil {
-		errorMessage := "Device not found: " + message.Sensor.Device
+		//errorMessage := "Device not found: " + message.Sensor.Device
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(errorMessage))
+		//w.Write([]byte(errorMessage))
 		log.Println(err)
 		return
 	}
