@@ -71,8 +71,8 @@ func (work *WorkRequest) PublishToFirebase() error {
 		topic := buffer.String()
 
 		//payload := work.transformToPayload()
-		//data, err := json.Marshal(payload)
-		//log.Println("Payload: ", string(data))
+		data, err := json.Marshal(work.Data)
+		log.Println("Payload: ", string(data))
 		fcmClient.NewFcmMsgTo(topic, work.Data)
 		fcmClient.SetTimeToLive(0)
 		status, err := fcmClient.Send()
@@ -106,6 +106,7 @@ func (work *WorkRequest) verifyAPIKey() bool {
 		b := tx.Bucket([]byte(apiBucket))
 		data := b.Get([]byte(work.Token))
 		if string(data) == "valid" {
+			log.Println("Valid API Key Accepted")
 			valid = true
 		}
 		return nil
