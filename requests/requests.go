@@ -162,6 +162,7 @@ func Reading(w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 		return
 	}
+	log.Println("adding message to queue")
 	workers.AddJob(*message)
 }
 
