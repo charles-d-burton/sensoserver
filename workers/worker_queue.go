@@ -51,7 +51,7 @@ type Topic struct {
 type WorkRequest struct {
 	//Sensor `json:"sensor"`
 	Token string          `json:"token"`
-	Data  json.RawMessage `json:"data"`
+	Data  string `json:"data"`
 }
 
 type Payload struct {
