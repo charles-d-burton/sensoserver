@@ -61,7 +61,9 @@ type Payload struct {
 }
 
 func (work *WorkRequest) PublishToFirebase() error {
+	log.Println("Received firebase publish request")
 	if useFirebase && work.verifyAPIKey() {
+		log.Println("Publishing to Firebase")
 		fcmClient := fcm.NewFcmClient(key)
 		//log.Println("Data: ", string(work.Data))
 		//Use a buffer to concat strings, it's much faster
