@@ -62,7 +62,7 @@ type Payload struct {
 
 func (work *WorkRequest) PublishToFirebase() error {
 	log.Println("Received firebase publish request")
-	if useFirebase && work.verifyAPIKey() {
+	if work.verifyAPIKey() {
 		log.Println("Publishing to Firebase")
 		fcmClient := fcm.NewFcmClient(key)
 		//log.Println("Data: ", string(work.Data))
