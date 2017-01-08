@@ -10,7 +10,6 @@ import (
 	"sensoserver/workers"
 	"strings"
 
-	"github.com/hashicorp/mdns"
 	"github.com/urfave/cli"
 	"rsc.io/letsencrypt"
 )
@@ -28,13 +27,13 @@ var (
 
 func main() {
 	// Setup our service export
-	host, _ := os.Hostname()
-	info := []string{"My awesome service"}
-	service, _ := mdns.NewMDNSService(host, "_sensorelay._tcp", "", "", 8000, getLocalIPS(), info)
+	//host, _ := os.Hostname()
+	//info := []string{"My awesome service"}
+	//service, _ := mdns.NewMDNSService(host, "_sensorelay._tcp", "", "", 8000, getLocalIPS(), info)
 
 	// Create the mDNS server, defer shutdown
-	server, _ := mdns.NewServer(&mdns.Config{Zone: service})
-	defer server.Shutdown()
+	//server, _ := mdns.NewServer(&mdns.Config{Zone: service})
+	//defer server.Shutdown()
 	//runtime.GOMAXPROCS(runtime.NumCPU())
 	//Start the work dispatcher
 	key := os.Getenv("APIKEY")
@@ -65,9 +64,7 @@ func main() {
 	workers.StartDispatcher(nWorkers, strings.Trim(key, " "))
 
 	http.HandleFunc("/", requests.Index)
-	//http.HandleFunc("/pages/", requests.Pages)
-	http.HandleFunc("/login", requests.HandleGoogleLogin)
-	http.HandleFunc("/callback", requests.HandleGoogleCallback)
+	http.HandleFunc("/google-token", requests.HandleGoogleCallback)
 
 	http.HandleFunc("/reading", requests.Reading)
 	http.HandleFunc("/register", requests.Register)
