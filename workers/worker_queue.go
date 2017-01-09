@@ -74,7 +74,9 @@ func (work *WorkRequest) PublishToFirebase() error {
 
 		//payload := work.transformToPayload()
 		data, err := json.Marshal(work.Data)
+		log.Println("Topic: ", topic)
 		log.Println("Payload: ", string(data))
+
 		fcmClient.NewFcmMsgTo(topic, work.Data)
 		fcmClient.SetTimeToLive(0)
 		status, err := fcmClient.Send()
