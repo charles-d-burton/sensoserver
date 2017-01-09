@@ -1,7 +1,6 @@
 package workers
 
 import (
-	"bytes"
 	"encoding/json"
 	"log"
 
@@ -75,7 +74,7 @@ func (work *WorkRequest) PublishToFirebase() error {
 		//payload := work.transformToPayload()
 		data, err := json.Marshal(work.Data)
 		log.Println("API_KEY: ", key)
-		log.Println("Topic: ", topic)
+		//log.Println("Topic: ", topic)
 		log.Println("Payload: ", string(data))
 
 		fcmClient.NewFcmMsgTo(work.Token, work.Data)
