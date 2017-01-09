@@ -1,6 +1,7 @@
 package workers
 
 import (
+	"bytes"
 	"encoding/json"
 	"log"
 
@@ -64,12 +65,12 @@ func (work *WorkRequest) PublishToFirebase() error {
 	if work.verifyAPIKey() {
 		log.Println("Publishing to Firebase")
 		fcmClient := fcm.NewFcmClient(key)
-		//log.Println("Data: ", string(work.Data))
+		log.Println("Data: ", string(work.Data))
 		//Use a buffer to concat strings, it's much faster
-		//buffer := bytes.NewBuffer(make([]byte, 0, 32))
-		//buffer.WriteString("/topics/")
-		//buffer.WriteString(work.Token)
-		//topic := buffer.String()
+		buffer := bytes.NewBuffer(make([]byte, 0, 32))
+		buffer.WriteString("/topics/")
+		buffer.WriteString(work.Token)
+		topic := buffer.String()
 
 		//payload := work.transformToPayload()
 		data, err := json.Marshal(work.Data)
@@ -77,7 +78,7 @@ func (work *WorkRequest) PublishToFirebase() error {
 		//log.Println("Topic: ", topic)
 		log.Println("Payload: ", string(data))
 
-		fcmClient.NewFcmMsgTo(work.Token, work.Data)
+		fcmClient.NewFcmMsgTo(topic, string(data))
 		fcmClient.SetTimeToLive(0)
 		status, err := fcmClient.Send()
 		if err != nil {
