@@ -65,7 +65,7 @@ func (work *WorkRequest) PublishToFirebase() error {
 	if work.verifyAPIKey() {
 		log.Println("Publishing to Firebase")
 		fcmClient := fcm.NewFcmClient(key)
-		log.Println("Data: ", string(work.Data))
+		//log.Println("Data: ", string(work.Data))
 		//Use a buffer to concat strings, it's much faster
 		buffer := bytes.NewBuffer(make([]byte, 0, 32))
 		buffer.WriteString("/topics/")
