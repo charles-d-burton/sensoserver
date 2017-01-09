@@ -74,6 +74,7 @@ func (work *WorkRequest) PublishToFirebase() error {
 
 		//payload := work.transformToPayload()
 		data, err := json.Marshal(work.Data)
+		log.Println("API_KEY: ", key)
 		log.Println("Topic: ", topic)
 		log.Println("Payload: ", string(data))
 
