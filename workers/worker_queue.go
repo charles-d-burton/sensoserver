@@ -3,6 +3,7 @@ package workers
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"log"
 
 	"github.com/NaySoftware/go-fcm"
@@ -50,7 +51,7 @@ type Topic struct {
 
 type WorkRequest struct {
 	//Sensor `json:"sensor"`
-	Token string          `json:"token"`
+	Token string           `json:"token"`
 	Data  *json.RawMessage `json:"data"`
 }
 
@@ -62,7 +63,8 @@ type Payload struct {
 
 func (work *WorkRequest) PublishToFirebase() error {
 	log.Println("Received firebase publish request")
-	if work.verifyAPIKey() {
+	fireBaseKeys := work.verifyAPIKey()
+	if fireBaseKeys != nil {
 		log.Println("Publishing to Firebase")
 		fcmClient := fcm.NewFcmClient(key)
 		//log.Println("Data: ", string(work.Data))
@@ -70,15 +72,17 @@ func (work *WorkRequest) PublishToFirebase() error {
 		buffer := bytes.NewBuffer(make([]byte, 0, 32))
 		buffer.WriteString("/topics/")
 		buffer.WriteString(work.Token)
-		topic := buffer.String()
+		//topic := buffer.String()
 
 		//payload := work.transformToPayload()
 		data, err := json.Marshal(work.Data)
 		log.Println("API_KEY: ", key)
+		fmt.Printf("%v", fireBaseKeys)
 		//log.Println("Topic: ", topic)
-		log.Println("Payload: ", string(data))
+		log.Println("\nPayload: ", string(data))
 
-		fcmClient.NewFcmMsgTo(topic, string(data))
+		//fcmClient.NewFcmMsgTo(topic, string(data))
+		fcmClient.NewFcmRegIdsMsg(fireBaseKeys, data)
 		fcmClient.SetTimeToLive(0)
 		status, err := fcmClient.Send()
 		if err != nil {
@@ -105,16 +109,20 @@ func (work *WorkRequest) transformToPayload() *Payload {
 	return nil
 }
 
-func (work *WorkRequest) verifyAPIKey() bool {
-	valid := false
+func (work *WorkRequest) verifyAPIKey() []string {
+	var fireBaseKeys FirebaseKeys
 	boltDB.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(apiBucket))
+
 		data := b.Get([]byte(work.Token))
-		if string(data) == "valid" {
+		err := json.Unmarshal(data, &fireBaseKeys)
+		if len(fireBaseKeys.Keys) > 0 {
 			log.Println("Valid API Key Accepted")
-			valid = true
+			return nil
+		} else {
+			log.Println("No valid keys")
+			return nil
 		}
-		return nil
 	})
-	return valid
+	return fireBaseKeys.Keys
 }
