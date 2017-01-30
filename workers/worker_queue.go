@@ -116,7 +116,7 @@ func (work *WorkRequest) verifyAPIKey() []string {
 
 		data := b.Get([]byte(work.Token))
 		err := json.Unmarshal(data, &fireBaseKeys)
-		if len(fireBaseKeys.Keys) > 0 {
+		if err == nil && len(fireBaseKeys.Keys) > 0 {
 			log.Println("Valid API Key Accepted")
 			return nil
 		} else {
