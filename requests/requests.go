@@ -45,8 +45,8 @@ func Index(w http.ResponseWriter, r *http.Request) {
 Google Callback code
 */
 type Token struct {
-	Token     string `json:"token"`
-	Fireabase string `json:"firebase"`
+	Token    string `json:"token"`
+	Firebase string `json:"firebase"`
 }
 
 func HandleGoogleCallback(w http.ResponseWriter, r *http.Request) {
@@ -58,6 +58,7 @@ func HandleGoogleCallback(w http.ResponseWriter, r *http.Request) {
 	var token Token
 	err := json.NewDecoder(r.Body).Decode(&token)
 	log.Println("TOKEN RECEIVED: ", token.Token)
+	log.Println("FIREBASE TOKEN: ", token.Firebase)
 	//token := r.FormValue("idtoken")
 	oauth2Service, err := oauth2.New(httpClient)
 	tokenInfoCall := oauth2Service.Tokeninfo()
@@ -66,7 +67,7 @@ func HandleGoogleCallback(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println(err)
 	}
-	user, err := workers.GetUser(tokenInfo.UserId, tokenInfo.Email)
+	user, err := workers.GetUser(tokenInfo.UserId, tokenInfo.Email, token.Firebase)
 	log.Println("Error:", err)
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(user)
