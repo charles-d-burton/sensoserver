@@ -45,7 +45,8 @@ func Index(w http.ResponseWriter, r *http.Request) {
 Google Callback code
 */
 type Token struct {
-	Token string `json:token`
+	Token     string `json:"token"`
+	Fireabase string `json:"firebase"`
 }
 
 func HandleGoogleCallback(w http.ResponseWriter, r *http.Request) {

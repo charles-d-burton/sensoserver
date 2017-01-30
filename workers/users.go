@@ -14,8 +14,13 @@ type User struct {
 	Token  string `json:"token"`
 }
 
-func GetUser(user_id, email string) (User, error) {
+type FirebaseKeys struct {
+	Keys []string `json:"firebase"`
+}
+
+func GetUser(user_id, email, firebase string) (User, error) {
 	var user User
+
 	//json.NewEncoder(os.Stderr).Encode(boltDB.Stats())
 	err := boltDB.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(usersBucket))
@@ -29,11 +34,16 @@ func GetUser(user_id, email string) (User, error) {
 			log.Println("Creating User: ", string(data))
 			err = b.Put([]byte(user.UserID), data)
 			log.Println("User created", err)
-			go registerAPIKey(user.Token)
+
+			firebaseKeys := FirebaseKeys{[]string{firebase}}
+			go registerAPIKey(user.Token, &firebaseKeys)
 			return err
 		} else {
 			log.Println("User found")
 			err1 := json.Unmarshal(v, &user)
+			if err1 != nil {
+				go addToken(user.Token, firebase)
+			}
 			return err1
 		}
 	})
@@ -45,14 +55,40 @@ type APIToken struct {
 	Token string `json:"token"`
 }
 
-func registerAPIKey(key string) error {
+func registerAPIKey(token string, keys *FirebaseKeys) error {
+	keyData, err := json.Marshal(keys)
+	if err != nil {
+		err = boltDB.Update(func(tx *bolt.Tx) error {
+			b := tx.Bucket([]byte(apiBucket))
+			v := b.Get([]byte(key))
+			if v == nil {
+
+				log.Println("API Key not registered, registering new API Key")
+				err := b.Put([]byte(token), keyData)
+				return err
+			}
+			return nil
+		})
+	}
+
+	return err
+}
+
+func addToken(key, firebase string) error {
 	err := boltDB.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(apiBucket))
 		v := b.Get([]byte(key))
-		if v == nil {
-			log.Println("API Key not registered, registering new API Key")
-			err := b.Put([]byte(key), []byte("valid"))
-			return err
+		if v != nil {
+			var keys FirebaseKeys
+			err := json.Unmarshal(v, &keys)
+			if err != nil {
+				keys.Keys = append(keys.Keys, firebase)
+				keyData, err := json.Marshal(keys)
+				err = b.Put([]byte(key), keyData)
+				return err
+			}
+		} else {
+			log.Println("No keys registered for: ", key)
 		}
 		return nil
 	})
