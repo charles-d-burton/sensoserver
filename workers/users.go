@@ -42,7 +42,7 @@ func GetUser(user_id, email, firebase string) (User, error) {
 		} else {
 			log.Println("User found")
 			err1 := json.Unmarshal(v, &user)
-			if err1 != nil {
+			if err1 == nil {
 				go addToken(user.Token, firebase)
 			}
 			return err1
