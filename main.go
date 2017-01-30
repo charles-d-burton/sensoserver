@@ -26,15 +26,6 @@ var (
 )
 
 func main() {
-	// Setup our service export
-	//host, _ := os.Hostname()
-	//info := []string{"My awesome service"}
-	//service, _ := mdns.NewMDNSService(host, "_sensorelay._tcp", "", "", 8000, getLocalIPS(), info)
-
-	// Create the mDNS server, defer shutdown
-	//server, _ := mdns.NewServer(&mdns.Config{Zone: service})
-	//defer server.Shutdown()
-	//runtime.GOMAXPROCS(runtime.NumCPU())
 	//Start the work dispatcher
 	key := os.Getenv("APIKEY")
 	app := processCLI()
@@ -67,11 +58,6 @@ func main() {
 	http.HandleFunc("/google-token", requests.HandleGoogleCallback)
 
 	http.HandleFunc("/reading", requests.Reading)
-	//http.HandleFunc("/register", requests.Register)
-	//http.HandleFunc("/register/jointopic", requests.JoinTopic)
-	//http.HandleFunc("/register/leavetopic", requests.LeaveTopic)
-	//http.HandleFunc("/register/refreshtoken", requests.RefreshToken)
-	//http.HandleFunc("/register/registerdevice", requests.RegisterDevice)
 
 	app.Run(os.Args)
 
