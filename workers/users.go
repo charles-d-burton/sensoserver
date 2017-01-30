@@ -85,6 +85,7 @@ func addToken(key, firebase string) error {
 			if err != nil {
 				keys.Keys = helpers.AppendStringIfMissing(keys.Keys, firebase)
 				keyData, err := json.Marshal(keys)
+				log.Println("Json of Keydata: \n", string(keyData))
 				err = b.Put([]byte(key), keyData)
 				return err
 			}
