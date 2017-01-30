@@ -3,6 +3,7 @@ package workers
 import (
 	"encoding/json"
 	"log"
+	"sensoserver/helpers"
 
 	"github.com/boltdb/bolt"
 	"github.com/satori/go.uuid"
@@ -82,7 +83,7 @@ func addToken(key, firebase string) error {
 			var keys FirebaseKeys
 			err := json.Unmarshal(v, &keys)
 			if err != nil {
-				keys.Keys = append(keys.Keys, firebase)
+				keys.Keys = helpers.AppendStringIfMissing(keys.Keys, firebase)
 				keyData, err := json.Marshal(keys)
 				err = b.Put([]byte(key), keyData)
 				return err
