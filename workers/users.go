@@ -76,6 +76,7 @@ func registerAPIKey(token string, keys *FirebaseKeys) error {
 }
 
 func addToken(key, firebase string) error {
+	log.Println("Running ADDTOKEN")
 	err := boltDB.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(apiBucket))
 		v := b.Get([]byte(key))
