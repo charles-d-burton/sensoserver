@@ -90,6 +90,7 @@ func (work *WorkRequest) PublishToFirebase() error {
 			log.Println(err)
 			//status.PrintResults()
 		}
+		status.PrintResults()
 		return err
 	}
 	return nil
