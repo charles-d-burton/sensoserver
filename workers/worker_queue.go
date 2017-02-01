@@ -2,7 +2,6 @@ package workers
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 
 	"github.com/NaySoftware/go-fcm"
@@ -66,21 +65,11 @@ func (work *WorkRequest) PublishToFirebase() error {
 	if fireBaseKeys != nil {
 		log.Println("Publishing to Firebase")
 		fcmClient := fcm.NewFcmClient(key)
-		//log.Println("Data: ", string(work.Data))
-		//Use a buffer to concat strings, it's much faster
-		//buffer := bytes.NewBuffer(make([]byte, 0, 32))
-		//buffer.WriteString("/topics/")
-		//buffer.WriteString(work.Token)
-		//topic := buffer.String()
 
-		//payload := work.transformToPayload()
-		//data, err := json.Marshal(work.Data)
-		data, err := work.Data.MarshalJSON()
-
-		log.Println("API_KEY: ", key)
-		fmt.Printf("%v", fireBaseKeys)
+		//log.Println("API_KEY: ", key)
+		//fmt.Printf("%v", fireBaseKeys)
 		//log.Println("Topic: ", topic)
-		log.Println("\nPayload: ", data)
+		//log.Println("\nPayload: ", data)
 
 		//fcmClient.NewFcmMsgTo(topic, string(data))
 		fcmClient.NewFcmRegIdsMsg(fireBaseKeys, work.Data)
