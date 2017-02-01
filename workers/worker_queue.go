@@ -80,10 +80,10 @@ func (work *WorkRequest) PublishToFirebase() error {
 		log.Println("API_KEY: ", key)
 		fmt.Printf("%v", fireBaseKeys)
 		//log.Println("Topic: ", topic)
-		log.Println("\nPayload: ", work.Data)
+		log.Println("\nPayload: ", data)
 
 		//fcmClient.NewFcmMsgTo(topic, string(data))
-		fcmClient.NewFcmRegIdsMsg(fireBaseKeys, data)
+		fcmClient.NewFcmRegIdsMsg(fireBaseKeys, work.Data)
 		fcmClient.SetTimeToLive(0)
 		status, err := fcmClient.Send()
 		if err != nil {
