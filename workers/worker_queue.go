@@ -61,8 +61,8 @@ type Payload struct {
 
 func (work *WorkRequest) PublishToFirebase() error {
 	log.Println("Received firebase publish request")
-	fireBaseKeys := work.verifyAPIKey()
-	if fireBaseKeys != nil {
+	fireBaseKeys := work.getKeys()
+	if fireBaseKeys != nil && len(fireBaseKeys) > 0 {
 		log.Println("Publishing to Firebase")
 		fcmClient := fcm.NewFcmClient(key)
 
@@ -100,7 +100,7 @@ func (work *WorkRequest) transformToPayload() *Payload {
 	return nil
 }
 
-func (work *WorkRequest) verifyAPIKey() []string {
+func (work *WorkRequest) getKeys() []string {
 	var fireBaseKeys FirebaseKeys
 	boltDB.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(apiBucket))
