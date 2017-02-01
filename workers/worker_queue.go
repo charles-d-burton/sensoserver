@@ -83,7 +83,7 @@ func (work *WorkRequest) PublishToFirebase() error {
 		log.Println("\nPayload: ", string(data))
 
 		//fcmClient.NewFcmMsgTo(topic, string(data))
-		fcmClient.NewFcmRegIdsMsg(fireBaseKeys, string(data))
+		fcmClient.NewFcmRegIdsMsg(fireBaseKeys, data)
 		fcmClient.SetTimeToLive(0)
 		status, err := fcmClient.Send()
 		if err != nil {
