@@ -113,7 +113,7 @@ func replayLastReadings(token string) error {
 		data.ForEach(func(k, v []byte) error {
 			var message WorkRequest
 			message.Token = token
-			err := json.Unmarshal(v, &message.Data)
+			err := json.Unmarshal(v, *message.Data)
 			data, err := json.Marshal(message)
 			log.Println("Retrieved value: ", string(data))
 			//AddJob(&message)
