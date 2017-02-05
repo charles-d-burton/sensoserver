@@ -1,9 +1,7 @@
 package workers
 
 import (
-	"bytes"
 	"encoding/json"
-	"fmt"
 	"log"
 
 	"github.com/NaySoftware/go-fcm"
@@ -64,26 +62,18 @@ type Payload struct {
 
 func (work *WorkRequest) PublishToFirebase() error {
 	log.Println("Received firebase publish request")
-	fireBaseKeys := work.verifyAPIKey()
-	if fireBaseKeys != nil {
+	fireBaseKeys := work.getKeys()
+	if fireBaseKeys != nil && len(fireBaseKeys) > 0 {
 		log.Println("Publishing to Firebase")
 		fcmClient := fcm.NewFcmClient(key)
-		//log.Println("Data: ", string(work.Data))
-		//Use a buffer to concat strings, it's much faster
-		buffer := bytes.NewBuffer(make([]byte, 0, 32))
-		buffer.WriteString("/topics/")
-		buffer.WriteString(work.Token)
-		//topic := buffer.String()
 
-		//payload := work.transformToPayload()
-		data, err := json.Marshal(work.Data)
-		log.Println("API_KEY: ", key)
-		fmt.Printf("%v", fireBaseKeys)
+		//log.Println("API_KEY: ", key)
+		//fmt.Printf("%v", fireBaseKeys)
 		//log.Println("Topic: ", topic)
-		log.Println("\nPayload: ", string(data))
+		//log.Println("\nPayload: ", data)
 
 		//fcmClient.NewFcmMsgTo(topic, string(data))
-		fcmClient.NewFcmRegIdsMsg(fireBaseKeys, data)
+		fcmClient.NewFcmRegIdsMsg(fireBaseKeys, work.Data)
 		fcmClient.SetTimeToLive(0)
 		status, err := fcmClient.Send()
 		if err != nil {
@@ -112,7 +102,7 @@ func (work *WorkRequest) transformToPayload() *Payload {
 	return nil
 }
 
-func (work *WorkRequest) verifyAPIKey() []string {
+func (work *WorkRequest) getKeys() []string {
 	var fireBaseKeys FirebaseKeys
 	boltDB.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(apiBucket))
