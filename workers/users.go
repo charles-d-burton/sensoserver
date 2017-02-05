@@ -79,6 +79,8 @@ func addToken(key, firebase string) error {
 	log.Println("Running ADDTOKEN")
 	err := boltDB.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(apiBucket))
+		dataBucket := tx.Bucket([]byte(dataBucket))
+		dataBucket.CreateBucketIfNotExists([]byte(key))
 		v := b.Get([]byte(key))
 		if v != nil {
 			var keys FirebaseKeys
