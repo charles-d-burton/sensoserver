@@ -116,8 +116,8 @@ func replayLastReadings(token string) error {
 			var message WorkRequest
 			message.Token = token
 			err := json.Unmarshal(v, message.Data)
-			//data, err := json.Marshal(message)
-			//log.Println("Retrieved value: ", string(data))
+			data, err := json.Marshal(message)
+			log.Println("Retrieved value: ", string(data))
 			//AddJob(&message)
 			return err
 		})
