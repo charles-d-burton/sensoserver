@@ -9,6 +9,7 @@ import (
 	"github.com/NaySoftware/go-fcm"
 	nsq "github.com/bitly/go-nsq"
 	"github.com/boltdb/bolt"
+	"github.com/tidwall/gjson"
 )
 
 var (
@@ -91,6 +92,7 @@ func (work *WorkRequest) PublishToFirebase() error {
 			//status.PrintResults()
 		}
 		status.PrintResults()
+		work.recordLastEvent()
 		return err
 	}
 	return nil
@@ -126,4 +128,17 @@ func (work *WorkRequest) verifyAPIKey() []string {
 		}
 	})
 	return fireBaseKeys.Keys
+}
+
+func (work *WorkRequest) recordLastEvent() error {
+	err := boltDB.Update(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte(dataBucket))
+		j, err := json.Marshal(&work.Data)
+		device := gjson.GetBytes(j, "sensor.device")
+		log.Println("Device: ", device.String())
+		log.Println("Data: ", string(j))
+		err = b.Put([]byte(device.String()), j)
+		return err
+	})
+	return err
 }
