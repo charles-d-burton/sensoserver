@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"log"
 	"sensoserver/helpers"
-	"sensoserver/workers"
 
 	"github.com/boltdb/bolt"
 	"github.com/satori/go.uuid"
@@ -106,18 +105,19 @@ func addToken(key, firebase string) error {
 	return err
 }
 
-func replayLastReadings(token string) {
+func replayLastReadings(token string) error {
 	err := boltDB.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(dataBucket))
 
 		data := b.Bucket([]byte(token))
 		data.ForEach(func(k, v []byte) error {
-			var message workers.WorkRequest
+			var message WorkRequest
 			message.Token = token
 			err := json.Unmarshal(v, &message.Data)
-			workers.AddJob(*message)
+			AddJob(message)
 			return err
 		})
 		return nil
 	})
+	return err
 }
