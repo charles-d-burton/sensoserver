@@ -60,6 +60,7 @@ func main() {
 	http.HandleFunc("/reading", requests.Reading)
 
 	http.HandleFunc("/alexa", requests.Alexa)
+	http.HandleFunc("/alexa/token", requests.HandleAlexaToken)
 
 	http.HandleFunc("/privacy-policy.html", requests.PrivacyPolicy)
 

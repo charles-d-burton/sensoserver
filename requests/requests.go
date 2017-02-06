@@ -95,6 +95,21 @@ func HandleGoogleCallback(w http.ResponseWriter, r *http.Request) {
 	log.Println(user.Email)
 }
 
+func HandleAlexaToken(w http.ResponseWriter, r *http.Request) {
+	var token Token
+	err := json.NewDecoder(r.Body).Decode(&token)
+	log.Println("TOKEN RECIEVED: ", token.Token)
+	oauth2Service, err := oauth2.New(httpClient)
+	tokenInfoCall := oauth2Service.Tokeninfo()
+	tokenInfoCall.IdToken(token.Token)
+	tokenInfo, err := tokenInfoCall.Do()
+	if err != nil {
+		log.Println(err)
+	}
+	log.Println("User: ", tokenInfo.UserId)
+	log.Println("Email: ", tokenInfo.Email)
+}
+
 //Reading ... process sensor data input
 func Reading(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
