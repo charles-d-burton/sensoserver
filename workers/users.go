@@ -171,6 +171,7 @@ func retrieveLastReading(token string) (string, error) {
 			} else {
 				raw = []byte(request.Raw)
 			}
+			log.Println("RAW MESSAGE: ", string(raw))
 			err := json.Unmarshal(raw, &device)
 			sensors = append(sensors, device)
 			return err
