@@ -165,7 +165,13 @@ func retrieveLastReading(token string) (string, error) {
 		data.ForEach(func(k, v []byte) error {
 			var device DeviceObject
 			request := gjson.GetBytes(v, "sensor")
-			err := json.Unmarshal([]byte(request.String()), &device)
+			var raw []byte
+			if request.Index > 0 {
+				raw = v[request.Index : request.Index+len(request.Raw)]
+			} else {
+				raw = []byte(request.Raw)
+			}
+			err := json.Unmarshal(raw, &device)
 			sensors = append(sensors, device)
 			return err
 		})
