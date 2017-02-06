@@ -7,6 +7,7 @@ import (
 
 	"github.com/boltdb/bolt"
 	"github.com/satori/go.uuid"
+	"github.com/tidwall/gjson"
 )
 
 type User struct {
@@ -20,8 +21,9 @@ type FirebaseKeys struct {
 }
 
 type DeviceObject struct {
-	Sensor string `json:"sensor,string"`
-	Data   string `json:"data,string"`
+	Device string `json:"device"`
+	Name   string `json:"name"`
+	Type   string `json:"type"`
 }
 
 func GetUser(user_id, email, firebase string) (User, error) {
@@ -162,7 +164,8 @@ func retrieveLastReading(token string) (string, error) {
 		data := b.Bucket([]byte(token))
 		data.ForEach(func(k, v []byte) error {
 			var device DeviceObject
-			err := json.Unmarshal(v, &device)
+			request := gjson.GetBytes(v, "sensor")
+			err := json.Unmarshal([]byte(request.String()), &device)
 			sensors = append(sensors, device)
 			return err
 		})
