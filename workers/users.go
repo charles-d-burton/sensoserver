@@ -160,7 +160,8 @@ func retrieveLastReading(token string) (string, error) {
 			message.Token = token
 			err := json.Unmarshal(v, &message.Data)
 			data, err := json.Marshal(message)
-			result := gjson.GetBytes(data, "data.data.sensor")
+			result := gjson.GetBytes(data, "data.sensor")
+			log.Println("Raw Value: ", string(data))
 			log.Println("Retrieved sensor: ", result.String())
 			return err
 		})
