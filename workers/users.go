@@ -7,6 +7,7 @@ import (
 
 	"github.com/boltdb/bolt"
 	"github.com/satori/go.uuid"
+	"github.com/tidwall/gjson"
 )
 
 type User struct {
@@ -159,8 +160,8 @@ func retrieveLastReading(token string) (string, error) {
 			message.Token = token
 			err := json.Unmarshal(v, &message.Data)
 			data, err := json.Marshal(message)
-			log.Println("Retrieved value: ", string(data))
-
+			result := gjson.GetBytes(data, "data.data.sensor")
+			log.Println("Retrieved sensor: ", result.String())
 			return err
 		})
 		return nil
