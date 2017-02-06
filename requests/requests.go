@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"net/http/httputil"
 	"sensoserver/workers"
 
 	"google.golang.org/api/oauth2/v2"
@@ -102,4 +103,14 @@ func decoder(r *http.Request) (*workers.WorkRequest, error) {
 	data, err := json.Marshal(message)
 	log.Println("Decoded message:", string(data))
 	return &message, err
+}
+
+func Alexa(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	requestDump, err := httputil.DumpRequest(r, true)
+	if err != nil {
+		log.Println(err)
+	}
+	log.Println(string(requestDump))
+
 }

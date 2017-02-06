@@ -59,6 +59,8 @@ func main() {
 
 	http.HandleFunc("/reading", requests.Reading)
 
+	http.HandleFunc("/alexa", requests.Alexa)
+
 	app.Run(os.Args)
 
 	//conn.Close()
@@ -67,7 +69,6 @@ func main() {
 func setupQueue(queueType, host, port string) {
 	if queueType == "both" || queueType == "nsq" {
 		workers.SetQueueType(queueType)
-		workers.SetupNSQ(host, port)
 	}
 }
 
