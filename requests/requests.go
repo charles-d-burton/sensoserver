@@ -70,6 +70,10 @@ type Token struct {
 	Firebase string `json:"firebase"`
 }
 
+type AlexaToken struct {
+	Token string `json:"accessToken"`
+}
+
 func HandleGoogleCallback(w http.ResponseWriter, r *http.Request) {
 	/*requestDump, err := httputil.DumpRequest(r, true)
 	if err != nil {
@@ -96,7 +100,7 @@ func HandleGoogleCallback(w http.ResponseWriter, r *http.Request) {
 }
 
 func HandleAlexaToken(w http.ResponseWriter, r *http.Request) {
-	var token Token
+	var token AlexaToken
 	err := json.NewDecoder(r.Body).Decode(&token)
 	log.Println("TOKEN RECIEVED: ", token.Token)
 	oauth2Service, err := oauth2.New(httpClient)
