@@ -7,6 +7,7 @@ import (
 
 	"github.com/boltdb/bolt"
 	"github.com/satori/go.uuid"
+	"github.com/tidwall/gjson"
 )
 
 type User struct {
@@ -163,7 +164,8 @@ func retrieveLastReading(token string) (string, error) {
 
 		data := b.Bucket([]byte(token))
 		data.ForEach(func(k, v []byte) error {
-			sensors = append(sensors, string(v))
+			request := gjson.GetBytes(v, "sensor")
+			sensors = append(sensors, request.String())
 			return nil
 		})
 		return nil
