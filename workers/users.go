@@ -125,3 +125,21 @@ func replayLastReadings(token string) error {
 	})
 	return err
 }
+
+func GetData(id string) (string, error) {
+	//json.NewEncoder(os.Stderr).Encode(boltDB.Stats())
+	err := boltDB.Update(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte(usersBucket))
+		v := b.Get([]byte(id))
+		if v == nil {
+			log.Println("User not found")
+			return nil
+		} else {
+			log.Println("User found")
+			log.Println(string(v))
+			return nil
+		}
+	})
+	log.Println("Returning from GetData")
+	return "", err
+}
