@@ -20,12 +20,10 @@ type FirebaseKeys struct {
 	Keys []string `json:"firebase"`
 }
 
-type AlexaSensors struct {
-	Sensors []struct {
-		Device string `json:"device"`
-		Name   string `json:"name"`
-		Type   string `json:"type"`
-	} `json:"sensors"`
+type DeviceObject struct {
+	Device string `json:"device"`
+	Name   string `json:"name"`
+	Type   string `json:"type"`
 }
 
 func GetUser(user_id, email, firebase string) (User, error) {
@@ -159,15 +157,17 @@ func GetData(id string) (string, error) {
 }
 
 func retrieveLastReading(token string) (string, error) {
-	var sensors []string
+	var sensors []DeviceObject
 	err := boltDB.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(dataBucket))
 
 		data := b.Bucket([]byte(token))
 		data.ForEach(func(k, v []byte) error {
+			var device DeviceObject
 			request := gjson.GetBytes(v, "sensor")
-			sensors = append(sensors, request.String())
-			return nil
+			err := json.Unmarshal([]byte(request.String()), &device)
+			sensors = append(sensors, device)
+			return err
 		})
 		return nil
 	})
