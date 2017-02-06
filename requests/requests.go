@@ -111,7 +111,9 @@ func HandleAlexaToken(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println(err)
 	}
-	workers.GetData(tokenInfo.UserId)
+	message, err := workers.GetData(tokenInfo.UserId)
+	w.Header().Set("Content-Type", "application/json")
+	w.Write([]byte(message))
 	log.Println("User: ", tokenInfo.UserId)
 	log.Println("Email: ", tokenInfo.Email)
 }

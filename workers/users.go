@@ -138,6 +138,7 @@ func replayLastReadings(token string) error {
 func GetData(id string) (string, error) {
 	//json.NewEncoder(os.Stderr).Encode(boltDB.Stats())
 	var user User
+	var message = ""
 	err := boltDB.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(usersBucket))
 		v := b.Get([]byte(id))
@@ -148,13 +149,13 @@ func GetData(id string) (string, error) {
 			log.Println("User found")
 			log.Println(string(v))
 			err1 := json.Unmarshal(v, &user)
-			message, err1 := retrieveLastReading(user.Token)
+			message, err1 = retrieveLastReading(user.Token)
 			log.Println(message)
 			return err1
 		}
 	})
 	log.Println("Returning from GetData")
-	return "", err
+	return message, err
 }
 
 func retrieveLastReading(token string) (string, error) {
