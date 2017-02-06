@@ -105,7 +105,8 @@ func HandleAlexaToken(w http.ResponseWriter, r *http.Request) {
 	log.Println("TOKEN RECIEVED: ", token.Token)
 	oauth2Service, err := oauth2.New(httpClient)
 	tokenInfoCall := oauth2Service.Tokeninfo()
-	tokenInfoCall.IdToken(token.Token)
+	tokenInfoCall.AccessToken(token.Token)
+	//tokenInfoCall.IdToken(token.Token)
 	tokenInfo, err := tokenInfoCall.Do()
 	if err != nil {
 		log.Println(err)
