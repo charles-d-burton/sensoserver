@@ -61,6 +61,8 @@ func main() {
 
 	http.HandleFunc("/alexa", requests.Alexa)
 
+	http.HandleFunc("/privacy-policy.html", requests.PrivacyPolicy)
+
 	app.Run(os.Args)
 
 	//conn.Close()

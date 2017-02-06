@@ -42,6 +42,26 @@ func Index(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func PrivacyPolicy(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	if r.Method != "GET" {
+		log.Println("Method no GET")
+		w.Header().Set("Allow", "GET")
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+	path := "privacy-policy.html"
+	w.Header().Add("Content-Type", getContentType(path))
+	log.Println(path)
+	if bs, err := Asset(path); err != nil {
+		log.Println(err)
+		w.WriteHeader(http.StatusNotFound)
+	} else {
+		var reader = bytes.NewBuffer(bs)
+		io.Copy(w, reader)
+	}
+}
+
 /*
 Google Callback code
 */
