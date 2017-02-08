@@ -4,10 +4,10 @@ import (
 	"encoding/json"
 	"log"
 	"sensoserver/helpers"
-	"sensoserver/workers"
 
 	"github.com/boltdb/bolt"
 	"github.com/satori/go.uuid"
+	"github.com/tidwall/gjson"
 )
 
 type User struct {
@@ -18,6 +18,12 @@ type User struct {
 
 type FirebaseKeys struct {
 	Keys []string `json:"firebase"`
+}
+
+type DeviceObject struct {
+	Device string `json:"device"`
+	Name   string `json:"name"`
+	Type   string `json:"type"`
 }
 
 func GetUser(user_id, email, firebase string) (User, error) {
@@ -80,6 +86,8 @@ func addToken(key, firebase string) error {
 	log.Println("Running ADDTOKEN")
 	err := boltDB.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(apiBucket))
+		dataBucket := tx.Bucket([]byte(dataBucket))
+		dataBucket.CreateBucketIfNotExists([]byte(key))
 		v := b.Get([]byte(key))
 		if v != nil {
 			var keys FirebaseKeys
@@ -106,7 +114,7 @@ func addToken(key, firebase string) error {
 	return err
 }
 
-func replayLastReadings(token string) {
+func replayLastReadings(token string) error {
 	err := boltDB.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(dataBucket))
 
@@ -115,9 +123,55 @@ func replayLastReadings(token string) {
 			var message WorkRequest
 			message.Token = token
 			err := json.Unmarshal(v, &message.Data)
-			workers.AddJob(*message)
+			data, err := json.Marshal(message)
+			log.Println("Retrieved value: ", string(data))
+			AddJob(message)
 			return err
 		})
 		return nil
 	})
+	return err
+}
+
+func GetData(id string) (string, error) {
+	//json.NewEncoder(os.Stderr).Encode(boltDB.Stats())
+	var user User
+	var message = ""
+	err := boltDB.Update(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte(usersBucket))
+		v := b.Get([]byte(id))
+		if v == nil {
+			log.Println("User not found")
+			return nil
+		} else {
+			log.Println("User found")
+			log.Println(string(v))
+			err1 := json.Unmarshal(v, &user)
+			message, err1 = retrieveLastReading(user.Token)
+			log.Println(message)
+			return err1
+		}
+	})
+	log.Println("Returning from GetData")
+	return message, err
+}
+
+func retrieveLastReading(token string) (string, error) {
+	var sensors []DeviceObject
+	err := boltDB.View(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte(dataBucket))
+
+		data := b.Bucket([]byte(token))
+		data.ForEach(func(k, v []byte) error {
+			var device DeviceObject
+			request := gjson.GetBytes(v, "sensor")
+			err := json.Unmarshal([]byte(request.String()), &device)
+			sensors = append(sensors, device)
+			return err
+		})
+		return nil
+	})
+	message, err := json.Marshal(sensors)
+	log.Println("SENSORS: ", string(message))
+	return string(message), err
 }

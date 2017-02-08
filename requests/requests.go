@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"net/http/httputil"
 	"sensoserver/workers"
 
 	"google.golang.org/api/oauth2/v2"
@@ -41,12 +42,36 @@ func Index(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func PrivacyPolicy(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	if r.Method != "GET" {
+		log.Println("Method no GET")
+		w.Header().Set("Allow", "GET")
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+	path := "privacy-policy.html"
+	w.Header().Add("Content-Type", getContentType(path))
+	log.Println(path)
+	if bs, err := Asset(path); err != nil {
+		log.Println(err)
+		w.WriteHeader(http.StatusNotFound)
+	} else {
+		var reader = bytes.NewBuffer(bs)
+		io.Copy(w, reader)
+	}
+}
+
 /*
 Google Callback code
 */
 type Token struct {
 	Token    string `json:"token"`
 	Firebase string `json:"firebase"`
+}
+
+type AlexaToken struct {
+	Token string `json:"accessToken"`
 }
 
 func HandleGoogleCallback(w http.ResponseWriter, r *http.Request) {
@@ -72,6 +97,25 @@ func HandleGoogleCallback(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(user)
 	log.Println(user.Email)
+}
+
+func HandleAlexaToken(w http.ResponseWriter, r *http.Request) {
+	var token AlexaToken
+	err := json.NewDecoder(r.Body).Decode(&token)
+	log.Println("TOKEN RECIEVED: ", token.Token)
+	oauth2Service, err := oauth2.New(httpClient)
+	tokenInfoCall := oauth2Service.Tokeninfo()
+	tokenInfoCall.AccessToken(token.Token)
+	//tokenInfoCall.IdToken(token.Token)
+	tokenInfo, err := tokenInfoCall.Do()
+	if err != nil {
+		log.Println(err)
+	}
+	message, err := workers.GetData(tokenInfo.UserId)
+	w.Header().Set("Content-Type", "application/json")
+	w.Write([]byte(message))
+	log.Println("User: ", tokenInfo.UserId)
+	log.Println("Email: ", tokenInfo.Email)
 }
 
 //Reading ... process sensor data input
@@ -102,4 +146,14 @@ func decoder(r *http.Request) (*workers.WorkRequest, error) {
 	data, err := json.Marshal(message)
 	log.Println("Decoded message:", string(data))
 	return &message, err
+}
+
+func Alexa(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	requestDump, err := httputil.DumpRequest(r, true)
+	if err != nil {
+		log.Println(err)
+	}
+	log.Println(string(requestDump))
+
 }

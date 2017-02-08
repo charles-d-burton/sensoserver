@@ -37,13 +37,6 @@ func SetQueueType(queue string) {
 	}
 }
 
-func SetupNSQ(host, port string) {
-	nsqHost = host
-	nsqPort = port
-	config := nsq.NewConfig()
-	pub, _ = nsq.NewProducer(host+":"+port, config)
-}
-
 type Topic struct {
 	TopicString string `json:"topic,omitempty"`
 }
@@ -52,12 +45,6 @@ type WorkRequest struct {
 	//Sensor `json:"sensor"`
 	Token string           `json:"token"`
 	Data  *json.RawMessage `json:"data"`
-}
-
-type Payload struct {
-	Device *string          `json:"device"`
-	Name   *string          `json:"name"`
-	Data   *json.RawMessage `json:"payload"`
 }
 
 func (work *WorkRequest) PublishToFirebase() error {
@@ -85,20 +72,6 @@ func (work *WorkRequest) PublishToFirebase() error {
 		work.recordLastEvent()
 		return err
 	}
-	return nil
-}
-
-func (work *WorkRequest) PublishToNSQ() error {
-	if useNSQ {
-		//err := pub.Publish(work.Topic.TopicString, []byte(work.Data))
-		//return err
-	}
-	return nil
-}
-
-func (work *WorkRequest) transformToPayload() *Payload {
-	//payload := Payload{Device: &work.Sensor.Device, Name: &work.Sensor.Name, Data: &work.Data}
-	//return &payload
 	return nil
 }
 
