@@ -112,7 +112,7 @@ func replayLastReadings(token string) {
 
 		data := b.Bucket([]byte(token))
 		data.ForEach(func(k, v []byte) error {
-			var message workers.WorkRequest
+			var message WorkRequest
 			message.Token = token
 			err := json.Unmarshal(v, &message.Data)
 			workers.AddJob(*message)
