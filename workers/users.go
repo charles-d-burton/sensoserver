@@ -7,6 +7,7 @@ import (
 
 	"github.com/boltdb/bolt"
 	"github.com/satori/go.uuid"
+	"github.com/tidwall/gjson"
 )
 
 type User struct {
@@ -146,20 +147,20 @@ func replayLastReadings(token string) error {
 	return err
 }
 
-/*func GetData(id string) (string, error) {
+func GetData(id string) (string, error) {
 	//json.NewEncoder(os.Stderr).Encode(boltDB.Stats())
 	var user User
 	var message = ""
 	err := boltDB.Update(func(tx *bolt.Tx) error {
-		b := tx.Bucket([]byte(usersBucket))
-		v := b.Get([]byte(id))
-		if v == nil {
+		userBucket := tx.Bucket([]byte(id))
+		if userBucket == nil {
 			log.Println("User not found")
 			return nil
 		} else {
 			log.Println("User found")
-			log.Println(string(v))
-			err1 := json.Unmarshal(v, &user)
+			data := userBucket.Get([]byte("userData"))
+			log.Println(string(data))
+			err1 := json.Unmarshal(data, &user)
 			message, err1 = retrieveLastReading(user.Token)
 			log.Println(message)
 			return err1
@@ -172,9 +173,9 @@ func replayLastReadings(token string) error {
 func retrieveLastReading(token string) (string, error) {
 	var sensors []DeviceObject
 	err := boltDB.View(func(tx *bolt.Tx) error {
-		b := tx.Bucket([]byte(dataBucket))
+		b := tx.Bucket([]byte(token))
 
-		data := b.Bucket([]byte(token))
+		data := b.Bucket([]byte("lastReadings"))
 		data.ForEach(func(k, v []byte) error {
 			var device DeviceObject
 			request := gjson.GetBytes(v, "sensor")
@@ -187,4 +188,4 @@ func retrieveLastReading(token string) (string, error) {
 	message, err := json.Marshal(sensors)
 	log.Println("SENSORS: ", string(message))
 	return string(message), err
-}*/
+}
