@@ -95,8 +95,8 @@ func (work *WorkRequest) getKeys() []string {
 
 func (work *WorkRequest) recordLastEvent() error {
 	err := boltDB.Update(func(tx *bolt.Tx) error {
-		dataBucket := tx.Bucket([]byte(dataBucket))
-		userData, err := dataBucket.CreateBucketIfNotExists([]byte(work.Token))
+		apiBucket := tx.Bucket([]byte(work.Token))
+		userData, err := apiBucket.CreateBucketIfNotExists([]byte("lastReadings"))
 		j, err := json.Marshal(&work.Data)
 		device := gjson.GetBytes(j, "sensor.device")
 		log.Println("Device: ", device.String())

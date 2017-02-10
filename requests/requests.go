@@ -93,10 +93,11 @@ func HandleGoogleCallback(w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 	}
 	user, err := workers.GetUser(tokenInfo.UserId, tokenInfo.Email, token.Firebase)
-	log.Println("Error:", err)
+	if err != nil {
+		log.Println(err)
+	}
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(user)
-	log.Println(user.Email)
 }
 
 func HandleAlexaToken(w http.ResponseWriter, r *http.Request) {
