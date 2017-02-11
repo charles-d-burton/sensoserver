@@ -81,14 +81,18 @@ func (work *WorkRequest) getKeys() []string {
 		b := tx.Bucket([]byte(work.Token))
 
 		data := b.Get([]byte("firebase-keys"))
-		err := json.Unmarshal(data, &fireBaseKeys)
-		if err == nil && len(fireBaseKeys.Keys) > 0 {
-			log.Println("Valid API Key Accepted")
-			return nil
-		} else {
-			log.Println("No valid keys")
-			return nil
+		if data != nil {
+			err := json.Unmarshal(data, &fireBaseKeys)
+			if err == nil && len(fireBaseKeys.Keys) > 0 {
+				log.Println("Valid API Key Accepted")
+				return nil
+			} else {
+				log.Println("No valid keys")
+				return nil
+			}
 		}
+		return nil
+
 	})
 	return fireBaseKeys.Keys
 }
