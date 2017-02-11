@@ -47,7 +47,7 @@ func GetUser(user_id, email, firebase string) (User, error) {
 			//Next create the place to store api data
 			firebaseKeys := FirebaseKeys{[]string{firebase}}
 			fireBaseData, err := json.Marshal(firebaseKeys)
-			log.Println("FIREBASE JSON ARRAY: ", fireBaseData)
+			log.Println("FIREBASE JSON ARRAY: ", string(fireBaseData))
 			apiBucket, err := tx.CreateBucketIfNotExists([]byte(user.Token))
 			apiBucket.Put([]byte("firebase-keys"), fireBaseData)
 
