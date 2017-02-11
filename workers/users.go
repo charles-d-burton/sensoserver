@@ -36,7 +36,7 @@ func GetUser(user_id, email, firebase string) (User, error) {
 			user.Email = email
 			user.Token = uuid.NewV4().String()
 			user.Id = user_id
-
+			log.Println("New User Token: ", user.Token)
 			//First create the user
 			userData, err := json.Marshal(user)
 			log.Println("Creating User: ", string(email))
@@ -96,6 +96,7 @@ type APIToken struct {
 
 func addToken(key, firebase string) error {
 	log.Println("Running ADDTOKEN")
+	log.Println("Token: ", key)
 	err := boltDB.Update(func(tx *bolt.Tx) error {
 		apiBucket := tx.Bucket([]byte(key))
 		if apiBucket != nil {
