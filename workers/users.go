@@ -62,7 +62,7 @@ func GetUser(user_id, email, firebase string) (User, error) {
 			err1 := json.Unmarshal(userJson, &user)
 			if err1 == nil {
 				//TODO:  Run this through the worker pool
-				go addToken(user.Token, firebase)
+				addToken(user.Token, firebase)
 			}
 			return err1
 		}
