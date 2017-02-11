@@ -28,7 +28,7 @@ type DeviceObject struct {
 
 func GetUser(user_id, email, firebase string) (User, error) {
 	var user User
-
+	log.Println("GETTING USER")
 	err := boltDB.Update(func(tx *bolt.Tx) error {
 		userBucket := tx.Bucket([]byte(user_id))
 		if userBucket == nil {
