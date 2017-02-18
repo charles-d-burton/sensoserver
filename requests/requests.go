@@ -114,7 +114,7 @@ func HandleAlexaToken(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println(err)
 	}
-	message, err := workers.GetData(tokenInfo.UserId)
+	message, err := workers.GetSensors(tokenInfo.UserId)
 	w.Header().Set("Content-Type", "application/json")
 	w.Write([]byte(message))
 	log.Println("User: ", tokenInfo.UserId)
@@ -160,7 +160,7 @@ func Alexa(w http.ResponseWriter, r *http.Request) {
 	tokenInfoCall.AccessToken(token.String())
 	//tokenInfoCall.IdToken(token.Token)
 	tokenInfo, err := tokenInfoCall.Do()
-	lastReadings, err := workers.GetData(tokenInfo.UserId)
+	lastReadings, err := workers.GetLastReadings(tokenInfo.UserId)
 	log.Println(lastReadings)
 	if err != nil {
 		log.Println(err)

@@ -148,7 +148,7 @@ func replayLastReadings(token string) error {
 	return err
 }
 
-func GetData(id string) (string, error) {
+func GetSensors(id string) (string, error) {
 	//json.NewEncoder(os.Stderr).Encode(boltDB.Stats())
 	var user User
 	var message = ""
@@ -162,7 +162,7 @@ func GetData(id string) (string, error) {
 			data := userBucket.Get([]byte("userData"))
 			log.Println(string(data))
 			err1 := json.Unmarshal(data, &user)
-			message, err1 = retrieveLastReading(user.Token)
+			message, err1 = retrieveSensors(user.Token)
 			log.Println(message)
 			return err1
 		}
@@ -171,7 +171,7 @@ func GetData(id string) (string, error) {
 	return message, err
 }
 
-func retrieveLastReading(token string) (string, error) {
+func retrieveSensors(token string) (string, error) {
 	var sensors []DeviceObject
 	err := boltDB.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(token))
