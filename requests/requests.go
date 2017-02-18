@@ -152,7 +152,7 @@ func decoder(r *http.Request) (*workers.WorkRequest, error) {
 func Alexa(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	message, err := ioutil.ReadAll(r.Body)
-	workers.ProcessIntentRequest(message)
+	workers.ProcessIntentRequest(string(message))
 	//requestDump, err := httputil.DumpRequest(r, true)
 	if err != nil {
 		log.Println(err)
