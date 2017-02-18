@@ -64,7 +64,7 @@ func retrieveLastReadings(token string) (string, error) {
 func generateSentence(sensor, reading gjson.Result) (string, error) {
 	var buffer bytes.Buffer
 	log.Println("Generating Sentence")
-	if reading.Get("type").String() == "temperature" {
+	if sensor.Get("type").String() == "temperature" {
 		log.Println("Found type Temperature")
 		temp := reading.Get("tempF").String()
 		name := sensor.Get("name").String()
