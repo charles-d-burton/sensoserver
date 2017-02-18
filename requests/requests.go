@@ -9,6 +9,8 @@ import (
 	"net/http"
 	"sensoserver/workers"
 
+	"github.com/tidwall/gjson"
+
 	"google.golang.org/api/oauth2/v2"
 )
 
@@ -152,7 +154,17 @@ func decoder(r *http.Request) (*workers.WorkRequest, error) {
 func Alexa(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	message, err := ioutil.ReadAll(r.Body)
-	workers.ProcessIntentRequest(string(message))
+	token := gjson.GetBytes(message, "session.user.accessToken")
+	oauth2Service, err := oauth2.New(httpClient)
+	tokenInfoCall := oauth2Service.Tokeninfo()
+	tokenInfoCall.AccessToken(token.String())
+	//tokenInfoCall.IdToken(token.Token)
+	tokenInfo, err := tokenInfoCall.Do()
+	lastReadings, err := workers.GetData(tokenInfo.UserId)
+	log.Println(lastReadings)
+	if err != nil {
+		log.Println(err)
+	}
 	//requestDump, err := httputil.DumpRequest(r, true)
 	if err != nil {
 		log.Println(err)

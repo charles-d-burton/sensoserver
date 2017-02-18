@@ -1,12 +1,8 @@
 package workers
 
-import (
-	"log"
+import "log"
 
-	"github.com/tidwall/gjson"
-)
+func GetToken(message string) {
 
-func ProcessIntentRequest(message string) {
-	token := gjson.Get(message, "session.user.accessToken")
-	log.Println(token)
+	log.Println(message)
 }
