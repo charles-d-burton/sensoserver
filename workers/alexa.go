@@ -40,7 +40,7 @@ func GetLastReadings(id string) (string, error) {
 
 func retrieveLastReadings(token string) (string, error) {
 	var buffer bytes.Buffer
-	buffer.WriteString("Your sensor current sensor readings. ")
+	buffer.WriteString("Your current sensor readings. ")
 	err := boltDB.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(token))
 
@@ -62,7 +62,9 @@ func retrieveLastReadings(token string) (string, error) {
 
 func generateSentence(sensor, reading gjson.Result) (string, error) {
 	var buffer bytes.Buffer
+	log.Println("Generating Sentence")
 	if reading.Get("type").String() == "temperature" {
+		log.Println("Found type Temperature")
 		temp := reading.Get("tempF").String()
 		name := sensor.Get("name").String()
 		if name == "" {
