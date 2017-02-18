@@ -48,6 +48,7 @@ func retrieveLastReadings(token string) (string, error) {
 		data.ForEach(func(k, v []byte) error {
 			request := gjson.GetBytes(v, "sensor")
 			reading := gjson.GetBytes(v, "data")
+			log.Println("LAST READING: ", string(v))
 			sentence, err := generateSentence(request, reading)
 			if sentence != "" {
 				buffer.WriteString(sentence)
