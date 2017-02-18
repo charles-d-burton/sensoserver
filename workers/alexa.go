@@ -27,7 +27,7 @@ func GetLastReadings(id string) (string, error) {
 			data := userBucket.Get([]byte("userData"))
 			log.Println(string(data))
 			err1 := json.Unmarshal(data, &user)
-			message, err1 = retrieveSensors(user.Token)
+			message, err1 = retrieveLastReadings(user.Token)
 			log.Println(message)
 			return err1
 		}
