@@ -68,7 +68,7 @@ func (work *WorkRequest) PublishToFirebase() error {
 			log.Println(err)
 			//status.PrintResults()
 		}
-		status.PrintResults()
+		//status.PrintResults()
 		work.recordLastEvent()
 		return err
 	}
@@ -106,7 +106,7 @@ func (work *WorkRequest) recordLastEvent() error {
 		j, err := json.Marshal(&work.Data)
 		device := gjson.GetBytes(j, "sensor.device")
 		log.Println("Device: ", device.String())
-		log.Println("Data: ", string(j))
+		//log.Println("Data: ", string(j))
 		err = userData.Put([]byte(device.String()), j)
 		return err
 	})
