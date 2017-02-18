@@ -161,6 +161,8 @@ func Alexa(w http.ResponseWriter, r *http.Request) {
 	//tokenInfoCall.IdToken(token.Token)
 	tokenInfo, err := tokenInfoCall.Do()
 	lastReadings, err := workers.GetLastReadings(tokenInfo.UserId)
+	w.Header().Set("Content-Type", "application/json")
+	w.Write([]byte(lastReadings))
 	log.Println(lastReadings)
 	if err != nil {
 		log.Println(err)

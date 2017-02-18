@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 
+	"github.com/Jeffail/gabs"
 	"github.com/boltdb/bolt"
 	"github.com/tidwall/gjson"
 )
@@ -54,5 +55,14 @@ func retrieveLastReadings(token string) (string, error) {
 	})
 	message, err := json.Marshal(sensors)
 	log.Println("SENSORS: ", string(message))
-	return string(message), err
+	response, err := generateAlexaResponse("")
+	return response, err
+}
+
+func generateAlexaResponse(reading string) (string, error) {
+	response := gabs.New()
+	response.Set("1.0", "version")
+	response.Set("PlainText", "response.outputSpeech.type")
+	response.Set("Something", "response.outputSpeech.text")
+	return response.String(), nil
 }
