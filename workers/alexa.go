@@ -72,7 +72,7 @@ func generateSentence(sensor, reading gjson.Result) (string, error) {
 			name = sensor.Get("device").String()
 		}
 		buffer.WriteString(name)
-		buffer.WriteString(" ")
+		buffer.WriteString(", ")
 		buffer.WriteString(temp)
 		buffer.WriteString(" degrees.")
 		return buffer.String(), nil
