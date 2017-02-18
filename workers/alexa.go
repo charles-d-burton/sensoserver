@@ -62,7 +62,7 @@ func retrieveLastReadings(token string) (string, error) {
 func generateAlexaResponse(reading string) (string, error) {
 	response := gabs.New()
 	response.Set("1.0", "version")
-	response.Set("PlainText", "response.outputSpeech.type")
-	response.Set("Something", "response.outputSpeech.text")
+	response.Set("PlainText", "response", "outputSpeech", "type")
+	response.Set("Something", "response", "outputSpeech", "text")
 	return response.String(), nil
 }
