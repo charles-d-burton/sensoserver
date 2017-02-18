@@ -1,6 +1,7 @@
 package workers
 
 import (
+	"bytes"
 	"encoding/json"
 	"log"
 
@@ -38,31 +39,50 @@ func GetLastReadings(id string) (string, error) {
 }
 
 func retrieveLastReadings(token string) (string, error) {
-	var sensors []DeviceObject
+	var buffer bytes.Buffer
+	buffer.WriteString("Your sensor current sensor readings. ")
 	err := boltDB.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(token))
 
 		data := b.Bucket([]byte("lastReadings"))
 		data.ForEach(func(k, v []byte) error {
-			var device DeviceObject
 			request := gjson.GetBytes(v, "sensor")
-			log.Println("LAST READINGS: ", string(v))
-			err := json.Unmarshal([]byte(request.String()), &device)
-			sensors = append(sensors, device)
+			reading := gjson.GetBytes(v, "data")
+			sentence, err := generateSentence(request, reading)
+			if sentence != "" {
+				buffer.WriteString(sentence)
+			}
 			return err
 		})
 		return nil
 	})
-	message, err := json.Marshal(sensors)
-	log.Println("SENSORS: ", string(message))
-	response, err := generateAlexaResponse("")
+	response, err := generateAlexaResponse(buffer.String())
 	return response, err
 }
 
-func generateAlexaResponse(reading string) (string, error) {
+func generateSentence(sensor, reading gjson.Result) (string, error) {
+	var buffer bytes.Buffer
+	if reading.Get("type").String() == "temperature" {
+		temp := reading.Get("tempF").String()
+		name := sensor.Get("name").String()
+		if name == "" {
+			name = sensor.Get("device").String()
+		}
+		buffer.WriteString(name)
+		buffer.WriteString(" ")
+		buffer.WriteString(temp)
+		buffer.WriteString(" degrees.")
+		return buffer.String(), nil
+	} else {
+		return "", nil
+	}
+
+}
+
+func generateAlexaResponse(messageString string) (string, error) {
 	response := gabs.New()
 	response.Set("1.0", "version")
 	response.Set("PlainText", "response", "outputSpeech", "type")
-	response.Set("Well, that was fun.", "response", "outputSpeech", "text")
+	response.Set(messageString, "response", "outputSpeech", "text")
 	return response.String(), nil
 }
